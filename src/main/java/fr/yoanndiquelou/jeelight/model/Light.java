@@ -1,6 +1,13 @@
 package fr.yoanndiquelou.jeelight.model;
 
-import java.util.List;
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Class that describe Light.
@@ -9,6 +16,8 @@ import java.util.List;
  *
  */
 public class Light {
+	/** Location. */
+	private String mLocation;
 	/** Light unique identifier. */
 	private long mId;
 	/** IP of light. */
@@ -18,7 +27,7 @@ public class Light {
 	/** Firmware version. */
 	private int mFirmware;
 	/** Supported tasks. */
-	private List<String> mTasks;
+	private Set<String> mTasks;
 	/** Power status. */
 	private boolean mPower;
 	/** Brightness. */
@@ -28,31 +37,68 @@ public class Light {
 	/** Ct. */
 	private int mCt;
 	/** rgb. */
-	private long mRGB;
+	private long mRgb;
 	/** Hue. */
 	private int mHue;
 	/** Saturation. */
 	private int mSaturation;
 	/** Name. */
 	private String mName;
-	
-	
+
 	/**
 	 * Empty constructor.
 	 */
 	public Light() {
-		
+		mTasks = new HashSet<>();
 	}
-	
+
+	public static Light fromDatagramPacket(InetAddress address, byte[] packetData) {
+		Light l = new Light();
+		Map<String, String> headers = new HashMap<>();
+		Pattern pattern = Pattern.compile("(.*): (.*)");
+
+		String[] lines = new String(packetData).split("\r\n");
+		for (String line : lines) {
+			Matcher matcher = pattern.matcher(line);
+			if (matcher.matches()) {
+				headers.put(matcher.group(1).toUpperCase(), matcher.group(2));
+			}
+		}
+		l.setIp(address.getHostAddress());
+		l.setLocation(headers.get("LOCATION"));
+		l.setName(address.getHostName());
+		l.setId(new BigInteger(headers.get("ID").substring(2), 16).longValue());
+		l.setModel(headers.get("MODEL"));
+		l.setFirmware(Integer.valueOf(headers.get("FW_VER")));
+		l.setPower("on".equalsIgnoreCase(headers.get("POWER")));
+		l.setBrightness(Integer.valueOf(headers.get("BRIGHT")));
+		l.setColorMode(Integer.valueOf(headers.get("COLOR_MODE")));
+		l.setCt(Integer.valueOf(headers.get("CT")));
+		l.setRGB(Long.valueOf(headers.get("RGB")));
+		l.setHue(Integer.valueOf(headers.get("HUE")));
+		l.setSaturation(Integer.valueOf(headers.get("SAT")));
+		// Add allowed tasks
+		String tasks = headers.get("SUPPORT");
+		if (null != tasks) {
+			String[] taskArray = tasks.split(" ");
+			for (String task : taskArray) {
+				l.addTask(task);
+			}
+		}
+
+		return l;
+	}
+
 	public void setIp(String ip) {
 		mIp = ip;
 	}
-	
+
 	public String getIp() {
 		return mIp;
 	}
 
-	/** Get Id.
+	/**
+	 * Get Id.
 	 * 
 	 * @return id of the light
 	 */
@@ -62,6 +108,7 @@ public class Light {
 
 	/**
 	 * Set Id.
+	 * 
 	 * @param id id
 	 */
 	public void setId(long id) {
@@ -69,7 +116,26 @@ public class Light {
 	}
 
 	/**
+	 * Set device location.
+	 * 
+	 * @param location device location
+	 */
+	public void setLocation(String location) {
+		mLocation = location;
+	}
+
+	/**
+	 * Get Device location.
+	 * 
+	 * @return location
+	 */
+	public String getLocation() {
+		return mLocation;
+	}
+
+	/**
 	 * Get light model.
+	 * 
 	 * @return light model
 	 */
 	public String getModel() {
@@ -78,6 +144,7 @@ public class Light {
 
 	/**
 	 * Set light model.
+	 * 
 	 * @param model model
 	 */
 	public void setModel(String model) {
@@ -86,6 +153,7 @@ public class Light {
 
 	/**
 	 * Get firmware version.
+	 * 
 	 * @return firmware version
 	 */
 	public int getFirmware() {
@@ -94,6 +162,7 @@ public class Light {
 
 	/**
 	 * Set firmware version.
+	 * 
 	 * @param firmware firmware version
 	 */
 	public void setFirmware(int firmware) {
@@ -102,31 +171,43 @@ public class Light {
 
 	/**
 	 * Get allowed tasks.
+	 * 
 	 * @return allowed tasks
 	 */
-	public List<String> getTasks() {
+	public Set<String> getTasks() {
 		return mTasks;
 	}
 
 	/**
-	 * Set allowed tasks.
-	 * @param tasks tasks
+	 * Add a task.
+	 * 
+	 * @param task task name
 	 */
-	public void setTasks(List<String> tasks) {
-		this.mTasks = tasks;
+	public void addTask(String task) {
+		mTasks.add(task);
+	}
+
+	/**
+	 * Remove a task.
+	 * 
+	 * @param task task name to remove
+	 */
+	public void removeTask(String task) {
+		mTasks.remove(task);
 	}
 
 	/**
 	 * Get power status.
+	 * 
 	 * @return power status
 	 */
 	public boolean isPower() {
 		return mPower;
 	}
 
-
 	/**
 	 * Set power status.
+	 * 
 	 * @param power power status
 	 */
 	public void setPower(boolean power) {
@@ -135,6 +216,7 @@ public class Light {
 
 	/**
 	 * Set the brightness.
+	 * 
 	 * @return light brightness
 	 */
 	public int getBrightness() {
@@ -143,6 +225,7 @@ public class Light {
 
 	/**
 	 * Set brightness.
+	 * 
 	 * @param brightness brightness
 	 */
 	public void setBrightness(int brightness) {
@@ -151,6 +234,7 @@ public class Light {
 
 	/**
 	 * Get the color mode.
+	 * 
 	 * @return color mode
 	 */
 	public int getColorMode() {
@@ -159,6 +243,7 @@ public class Light {
 
 	/**
 	 * Color mode.
+	 * 
 	 * @param colorMode colormode
 	 */
 	public void setColorMode(int colorMode) {
@@ -167,6 +252,7 @@ public class Light {
 
 	/**
 	 * CT?
+	 * 
 	 * @return ct
 	 */
 	public int getCt() {
@@ -175,6 +261,7 @@ public class Light {
 
 	/**
 	 * CT?
+	 * 
 	 * @param ct ct
 	 */
 	public void setCt(int ct) {
@@ -183,22 +270,25 @@ public class Light {
 
 	/**
 	 * Get RGB value.
+	 * 
 	 * @return rgb value
 	 */
 	public long getRGB() {
-		return mRGB;
+		return mRgb;
 	}
 
 	/**
 	 * Set RGB value.
-	 * @param RGB rgb
+	 * 
+	 * @param rgb rgb
 	 */
-	public void setRGB(long RGB) {
-		mRGB = RGB;
+	public void setRGB(long rgb) {
+		mRgb = rgb;
 	}
 
 	/**
 	 * Get Hue.
+	 * 
 	 * @return hue
 	 */
 	public int getHue() {
@@ -207,6 +297,7 @@ public class Light {
 
 	/**
 	 * Set Hue.
+	 * 
 	 * @param hue hue
 	 */
 	public void setHue(int hue) {
@@ -215,6 +306,7 @@ public class Light {
 
 	/**
 	 * Get saturation.
+	 * 
 	 * @return saturation
 	 */
 	public int getSaturation() {
@@ -223,6 +315,7 @@ public class Light {
 
 	/**
 	 * Set saturation.
+	 * 
 	 * @param saturation saturation
 	 */
 	public void setSaturation(int saturation) {
@@ -231,6 +324,7 @@ public class Light {
 
 	/**
 	 * Get name of the light.
+	 * 
 	 * @return light name
 	 */
 	public String getName() {
@@ -239,19 +333,34 @@ public class Light {
 
 	/**
 	 * Set light name.
+	 * 
 	 * @param name name of the light
 	 */
 	public void setName(String name) {
 		mName = name;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Name: ").append(mName).append("\r\n");
-		builder.append("power: ").append((true?"on":"off")).append("\r\n");
+		builder.append("IP: ").append(mIp).append("\r\n");
+		builder.append("Location: ").append(mLocation).append("\r\n");
+		builder.append("Id: ").append(mId).append("\r\n");
+		builder.append("Model: ").append(mModel).append("\r\n");
+		builder.append("Firmware: ").append(mFirmware).append("\r\n");
+		builder.append("power: ").append((mPower ? "on" : "off")).append("\r\n");
 		builder.append("Brightness: ").append(mBrightness).append("\r\n");
+		builder.append("Color mode: ").append(mColorMode).append("\r\n");
+		builder.append("CT: ").append(mCt).append("\r\n");
+		builder.append("RGB: ").append(mRgb).append("\r\n");
+		builder.append("Hue: ").append(mHue).append("\r\n");
+		builder.append("Saturation: ").append(mSaturation).append("\r\n");
+		builder.append("tasks:").append("\r\n");
+		for(String task: mTasks) {
+			builder.append("\t").append(task).append("\r\n");
+		}
 		return builder.toString();
 	}
-	
+
 }

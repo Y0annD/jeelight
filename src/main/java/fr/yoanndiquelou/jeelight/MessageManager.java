@@ -5,50 +5,85 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import fr.yoanndiquelou.jeelight.exception.CommandException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import fr.yoanndiquelou.jeelight.exception.ParameterException;
 import fr.yoanndiquelou.jeelight.model.Command;
 import fr.yoanndiquelou.jeelight.model.Light;
 import fr.yoanndiquelou.jeelight.model.Method;
 
 public class MessageManager {
+	/** Message manager logger. */
+	private static final Logger logger = LogManager.getLogger(MessageManager.class);
+	/** Socket to communicate with Light. */
+	private final Socket mSocket;
+	/** Light instance. */
+	private final Light mLight;
 	/** Id of message. */
-	int id = 150;
+	private int id = 1;
 
-	public void send(Light light, Method method, Object[] params) throws InterruptedException, ExecutionException {
+	/**
+	 * Message manager constructor.
+	 * 
+	 * @param light light to manage
+	 * @throws IOException input/output exception
+	 */
+	public MessageManager(Light light) throws IOException {
+		mLight = light;
+		mSocket = new Socket(mLight.getIp(), 55443);
+	}
+
+	/**
+	 * Message manager.
+	 * <p>
+	 * For test purposes only.
+	 * </p>
+	 * 
+	 * @param light  light to manage
+	 * @param socket socket mocket
+	 */
+	public MessageManager(Light light, Socket socket) {
+		mLight = light;
+		mSocket = socket;
+	}
+
+	public boolean send(Method method, Object[] params) throws ExecutionException {
 		Command cmd;
+		boolean result;
 		try {
 			cmd = new Command(id++, method, params);
-			System.out.println("Ip: " + light.getIp());
-			System.out.println("Data: " + cmd.toString());
-			try (Socket clientSocket = new Socket(light.getIp(), 55443)) {
-				DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-				BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-				Future<Boolean> sendFuture = cmd.send(outToServer, inFromServer);
+			logger.debug("Ip: " + mLight.getIp());
+			logger.debug("Data: " + cmd.toString());
+			DataOutputStream outToServer = new DataOutputStream(mSocket.getOutputStream());
+			BufferedReader inFromServer = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
+			Future<Boolean> sendFuture = cmd.send(outToServer, inFromServer);
+			try {
+
 				while (!sendFuture.isDone()) {
-					System.out.println("Calculating...");
+					logger.debug("Waiting for command result ...");
 					Thread.sleep(300);
+
 				}
 
-				Boolean result = sendFuture.get();
-				System.out.println("Result: " + result);
-				
-			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				result = sendFuture.get();
+			} catch (InterruptedException e) {
+				result = false;
+				throw new ExecutionException("Error while sending command", e);
 			}
-		} catch (CommandException | ParameterException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+			logger.debug("Result: " + result);
 
+		} catch (ParameterException e1) {
+			logger.error("Wrong parameter", e1);
+			result = false;
+		} catch (IOException e) {
+			logger.error("Error while sending command", e);
+			result = false;
+		}
+		return result;
 	}
 
 }

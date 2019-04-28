@@ -1,108 +1,187 @@
 package fr.yoanndiquelou.jeelight.ssdp;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import fr.yoanndiquelou.jeelight.model.Light;
+
+/**
+ * SSDP Client.
+ * 
+ * @author Y0annD
+ * 
+ *         <p>
+ *         Simple SSDP implementation to retrieve Yeelight devices.
+ *         </p>
+ *
+ */
 public class SSDPClient {
+	/** Add device type. */
+	public static final String ADD = "ADD";
+	/** SSDP client logger. */
+	private static final Logger logger = LogManager.getLogger(SSDPClient.class);
+	/** Is discovering. */
+	private boolean mIsDiscovering;
+	/** Socket Timeout. */
+	private int mTimeout;
+	/** Socket port. */
+	private int mPort;
+	/** Service to listen. */
+	private String mServiceType;
+	/** Listening thread. */
+	private Thread mListeningThread;
+	/** Arriving observable. */
+	private Set<Light> mDevices;
+	/** Listeners to devices change. */
+	private List<PropertyChangeListener> mListeners;
 
-	/**
-	 * Discover any UPNP device using SSDP (Simple Service Discovery Protocol).
-	 * 
-	 * @param timeout     in milliseconds
-	 * @param port        port to use
-	 * @param serviceType if null it use "ssdp:all"
-	 * @return List of devices discovered
-	 * @throws IOException
-	 * @see <a href=
-	 *      "https://en.wikipedia.org/wiki/Simple_Service_Discovery_Protocol">SSDP
-	 *      Wikipedia Page</a>
-	 */
-	public static List<Device> discover(int timeout, int port, String serviceType) throws IOException {
-		List<Device> devices = new ArrayList<Device>();
-		byte[] sendData;
-		byte[] receiveData = new byte[1024];
+	public SSDPClient(int timeout, String serviceType, int port) throws SocketException {
+		this(timeout, serviceType, port, new DatagramSocket());
+	}
 
-		/* Create the search request */
-		StringBuilder msearch = new StringBuilder("M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:").append(port)
-				.append("\r\nMAN: \"ssdp:discover\"\r\n");
-		if (serviceType == null) {
-			msearch.append("ST: ssdp:all\r\n");
-		} else {
-			msearch.append("ST: ").append(serviceType).append("\r\n");
-		}
-
-		/* Send the request */
-		sendData = msearch.toString().getBytes();
-		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
-				InetAddress.getByName("239.255.255.250"), port);
-		System.out.println(msearch.toString());
-		DatagramSocket clientSocket = new DatagramSocket();
-		clientSocket.setSoTimeout(timeout);
-		clientSocket.send(sendPacket);
-
-		/* Receive all responses */
-		while (true) {
+	public SSDPClient(int timeout, String serviceType, int port, DatagramSocket clientSocket) {
+		mTimeout = timeout;
+		mServiceType = serviceType;
+		mPort = port;
+		mDevices = new HashSet<>();
+		mListeners = new ArrayList<>();
+		mListeningThread = new Thread(() -> {
 			try {
-				DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-				clientSocket.receive(receivePacket);
-				devices.add(Device.parse(receivePacket));
-			} catch (SocketTimeoutException e) {
-				System.err.println("Timeout");
-				break;
-			}
-		}
+				byte[] sendData;
+				byte[] receiveData = new byte[1024];
 
-		clientSocket.close();
-		return Collections.unmodifiableList(devices);
+				/* Send the request */
+				sendData = buildRequestString().getBytes();
+				DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
+						InetAddress.getByName("239.255.255.250"), mPort);
+				logger.debug(buildRequestString());
+				clientSocket.setSoTimeout(mTimeout);
+				clientSocket.send(sendPacket);
+
+				/* Receive all responses */
+				while (mIsDiscovering) {
+					try {
+						DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+						clientSocket.receive(receivePacket);
+						addDevice(Light.fromDatagramPacket(receivePacket.getAddress(), receivePacket.getData()));
+
+					} catch (SocketTimeoutException e) {
+						logger.debug("");
+					}
+				}
+				clientSocket.close();
+			} catch (IOException e) {
+				logger.error("Error during discovery", e);
+			}
+		});
 	}
 
 	/**
-	 * Discover one device.
+	 * build ssdp request.
 	 * 
-	 * @param timeout     request timeout
-	 * @param port        port to listen
-	 * @param serviceType service type
-	 * @return the device object
-	 * @throws IOException Input/Output exception
+	 * @return ssdp request string
 	 */
-	public static Device discoverOne(int timeout, int port, Optional<String> serviceType) throws IOException {
-		Device device = null;
-		byte[] sendData;
-		byte[] receiveData = new byte[1024];
-
+	public String buildRequestString() {
 		/* Create the search request */
-		StringBuilder msearch = new StringBuilder("M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:").append(port)
+		StringBuilder search = new StringBuilder("M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:").append(mPort)
 				.append("\r\nMAN: \"ssdp:discover\"\r\n");
-		if (!serviceType.isPresent()) {
-			msearch.append("ST: ssdp:all\r\n");
+		if (mServiceType == null) {
+			search.append("ST: ssdp:all\r\n");
 		} else {
-			msearch.append("ST: ").append(serviceType.get()).append("\r\n");
+			search.append("ST: ").append(mServiceType).append("\r\n");
 		}
-
-		/* Send the request */
-		sendData = msearch.toString().getBytes();
-		DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
-				InetAddress.getByName("239.255.255.250"), port);
-		DatagramSocket clientSocket = new DatagramSocket();
-		clientSocket.setSoTimeout(timeout);
-		clientSocket.send(sendPacket);
-
-		/* Receive one response */
-		try {
-			DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-			clientSocket.receive(receivePacket);
-			device = Device.parse(receivePacket);
-		} catch (SocketTimeoutException e) {
-		}
-
-		clientSocket.close();
-		return device;
+		return search.toString();
 	}
+
+	/**
+	 * Get devices.
+	 * 
+	 * @return devices
+	 */
+	public Set<Light> getDevices() {
+		return mDevices;
+	}
+
+	/**
+	 * Is discovering enable.
+	 * 
+	 * @return true if discovering is enabled
+	 */
+	public boolean isDiscovering() {
+		return mIsDiscovering;
+	}
+
+	/**
+	 * Add a device Listener.
+	 * 
+	 * @param listener device listener
+	 */
+	public void addListener(PropertyChangeListener listener) {
+		if (!mListeners.contains(listener)) {
+			mListeners.add(listener);
+		}
+	}
+
+	/**
+	 * Remove a device listener.
+	 * 
+	 * @param listener device listener
+	 */
+	public void removeListener(PropertyChangeListener listener) {
+		mListeners.remove(listener);
+	}
+
+	/**
+	 * Add a device.
+	 * 
+	 * @param device new device
+	 */
+	private void addDevice(Light device) {
+		if (mDevices.add(device)) {
+			notifyListeners(this, ADD, mDevices, device);
+		}
+	}
+
+	/**
+	 * Notify listeners that new devices appears.
+	 * 
+	 * @param object   object
+	 * @param property change property
+	 * @param devices  devices list
+	 * @param device   new device
+	 */
+	private void notifyListeners(Object object, String property, Set<Light> devices, Light device) {
+		for (PropertyChangeListener listener : mListeners) {
+			listener.propertyChange(new PropertyChangeEvent(this, property, devices, device));
+		}
+	}
+
+	/**
+	 * Start discovering.
+	 */
+	public void startDiscovering() {
+		mIsDiscovering = true;
+		mListeningThread.start();
+	}
+
+	/**
+	 * Stop discovering.
+	 */
+	public void stopDiscovering() {
+		mIsDiscovering = false;
+	}
+
 }

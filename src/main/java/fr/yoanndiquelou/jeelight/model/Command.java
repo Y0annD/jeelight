@@ -2,16 +2,30 @@ package fr.yoanndiquelou.jeelight.model;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import fr.yoanndiquelou.jeelight.exception.CommandException;
 import fr.yoanndiquelou.jeelight.exception.ParameterException;
 
+/**
+ * Command class.
+ * 
+ * @author y0annD
+ *
+ */
 public class Command {
+
+	/** Command logger. */
+	private static final Logger logger = LogManager.getLogger(Command.class);
+
 	/** Id of command. */
 	private int mId;
 	/** Method. */
@@ -37,38 +51,15 @@ public class Command {
 	 * 
 	 * @param id     id
 	 * @param method method
-	 * @param params parameters
-	 */
-//	public Command(int id, String method, List<Object> params) {
-//		this(id, method);
-//		mParams = params;
-//	}
-
-	/**
-	 * Command.
-	 * 
-	 * @param id     id
-	 * @param method method
-	 * @param params params Array
-	 */
-//	public Command(int id, String method, Object[] params) {
-//		this(id, method);
-//		mParams = Arrays.asList(params);
-//	}
-
-	/**
-	 * Command.
-	 * 
-	 * @param id     id
-	 * @param method method
 	 * @param params params
 	 */
-	public Command(int id, Method method, Object... params) throws CommandException, ParameterException {
+	public Command(int id, Method method, Object... params) throws ParameterException {
 		this(id, method);
-		mParams = new ArrayList<Object>();
-		
-		for (Object param : params) {
-			mParams.add(param);
+		mParams = new ArrayList<>();
+
+		method.check(params);
+		for (int i = 0; i < params.length; i++) {
+				mParams.add(params[i]);
 		}
 	}
 
@@ -84,14 +75,20 @@ public class Command {
 			writer.write(toString().getBytes());
 			writer.flush();
 			String result = reader.readLine();
-			System.out.println(result);
-			return result.length() > 0;
+			logger.debug(result);
+			if (null != result) {
+				return result.trim().length() > 0;
+			} else {
+				return false;
+			}
 		});
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("{\"id\":").append(mId).append(",\"method\":\"").append(mMethod.getName()).append("\",\"params\":[");
+		builder.append("{\"id\":").append(mId).append(",\"method\":\"").append(mMethod.getName())
+				.append("\",\"params\":[");
 		for (int i = 0; i < mParams.size(); i++) {
 			if (mParams.get(i) instanceof String) {
 				builder.append("\"");

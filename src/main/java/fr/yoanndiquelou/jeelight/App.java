@@ -1,15 +1,16 @@
 package fr.yoanndiquelou.jeelight;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import fr.yoanndiquelou.jeelight.model.Light;
 import fr.yoanndiquelou.jeelight.model.Method;
-import fr.yoanndiquelou.jeelight.ssdp.Device;
 import fr.yoanndiquelou.jeelight.ssdp.SSDPClient;
 
 /**
@@ -17,31 +18,53 @@ import fr.yoanndiquelou.jeelight.ssdp.SSDPClient;
  *
  */
 public class App {
-	public static void main(String[] args) throws IOException {
-		System.out.println("Hello World!");
-		Map<String, Light> devMap = new HashMap();
-		MessageManager manager = new MessageManager();
-//        List<Device> devices = SSDPClient.discover(1000, "urn:schemas-upnp-org:device:ZonePlayer:1");
-		List<Device> devices = SSDPClient.discover(5000, 1982, "wifi_bulb");
-		System.out.println(devices.size() + " ssdp devices found");
-		for (Device dev : devices) {
-			System.out.println(dev.toString());
-		}
-		List<Light> lights = devices.stream().distinct().map(new DeviceToLight()).collect(Collectors.<Light>toList());
-		for (Light l : lights) {
-			System.out.println(l.toString());
-			try {
+	/** App logger. */
+	private static final Logger logger = LogManager.getLogger(App.class);
 
-				if (l.isPower()) {
-					manager.send(l, Method.SET_POWER, new Object[] { "off", "smooth", 500 });
-				} else {
-					manager.send(l, Method.SET_POWER, new Object[] { "on", "smooth", 500 });
-				}
-			} catch (InterruptedException | ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+	public static void main(String[] args) throws IOException {
+		logger.info("Start!");
+
+		SSDPClient client = new SSDPClient(5000, "wifi_bulb", 1982);
+		Set<Light> devices = client.getDevices();
+		logger.info(devices.size() + " ssdp devices found");
+		for (Light dev : devices) {
+			logger.info(dev.toString());
 		}
+		client.addListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				try {
+					if (SSDPClient.ADD.equals(evt.getPropertyName())) {
+						Light l = (Light) evt.getNewValue();
+						MessageManager manager = null;
+						try {
+							manager = new MessageManager(l);
+						} catch (IOException e) {
+							logger.error("Network exception", e);
+							System.exit(1);
+						}
+						if (l.isPower()) {
+							manager.send(Method.SET_POWER, new Object[] { "off", "smooth", 500 });
+						} else {
+							manager.send(Method.SET_POWER, new Object[] { "on", "smooth", 500 });
+						}
+						devices.add(l);
+					}
+				} catch (ExecutionException e) {
+					logger.error("Error while sending command", e);
+				}
+			}
+		});
+		client.startDiscovering();
+
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			logger.error("Unable to pause application");
+		}
+		client.stopDiscovering();
+
 		System.exit(0);
 	}
 }

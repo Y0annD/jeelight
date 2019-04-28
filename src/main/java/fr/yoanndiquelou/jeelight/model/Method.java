@@ -3,7 +3,6 @@ package fr.yoanndiquelou.jeelight.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.yoanndiquelou.jeelight.exception.CommandException;
 import fr.yoanndiquelou.jeelight.exception.ParameterException;
 
 public enum Method {
@@ -11,7 +10,7 @@ public enum Method {
 	SET_RGB("set_rgb", Integer.class, String.class, Integer.class),
 	SET_HSV("set_hsv", Integer.class, Integer.class, String.class, Integer.class),
 	SET_BRIGHT("set_bright", Integer.class, String.class, Integer.class),
-	SET_POWER("set_power", String.class, String.class, Integer.class, Integer.class),
+	SET_POWER("set_power", String.class, String.class, Integer.class),
 	TOGGLE("toggle"),
 	SET_DEFAULT("set_default"),
 	START_CF("start_cf", Integer.class, Integer.class, String.class),
@@ -51,9 +50,9 @@ public enum Method {
 		}
 	}
 
-	public void check(Object... parameters) throws CommandException, ParameterException {
+	public void check(Object... parameters) throws ParameterException {
 		if(mParamTypes.size() != parameters.length) {
-			throw new CommandException("Found "+parameters.length+" but expect " + mParamTypes.size());
+			throw new ParameterException("Found "+parameters.length+" parameters but expect " + mParamTypes.size());
 		}
 		for(int i = 0; i< parameters.length; i++) {
 			if(!parameters[i].getClass().equals(mParamTypes.get(i))) {
@@ -70,5 +69,15 @@ public enum Method {
 	 */
 	public String getName() {
 		return mName;
+	}
+	
+	/**
+	 * Get the parameter at specified index.
+	 * 
+	 * @param index index
+	 * @return parameter class
+	 */
+	public Class<?> getParameter(final int index) {
+		return mParamTypes.get(index);
 	}
 }

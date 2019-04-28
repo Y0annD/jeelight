@@ -14,10 +14,21 @@ public class CommandException extends Exception {
 		super();
 	}
 
+	/**
+	 * Exception with message.
+	 * 
+	 * @param message message
+	 */
 	public CommandException(String message) {
 		super(message);
 	}
 
+	/**
+	 * Exception with message and original exception.
+	 * 
+	 * @param message message
+	 * @param e original exception
+	 */
 	public CommandException(String message, Exception e) {
 		super(message, e);
 	}
