@@ -8,8 +8,9 @@ The aim of jeelight is to manage for you the discovery and communication with di
 To use the Lib, you need to have oppened the developer mode in your bulb.
 
 To do this, open your `Yeelight` mobile application,
-	- Click in the button that look like an Ùp Arrow`
-	- Check that the button `Control on local network` is checked
+
+- Click in the button that look like an `Up Arrow`
+- Check that the button `Control on local network` is checked
 
 ## Discovering devices
 

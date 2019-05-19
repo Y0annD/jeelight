@@ -6,6 +6,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -15,8 +17,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import fr.yoanndiquelou.jeelight.communication.MessageManager;
+import fr.yoanndiquelou.jeelight.model.ColorFlowEnd;
+import fr.yoanndiquelou.jeelight.model.ColorMode;
 import fr.yoanndiquelou.jeelight.model.EasyLight;
 import fr.yoanndiquelou.jeelight.model.EffectType;
+import fr.yoanndiquelou.jeelight.model.FlowColor;
 import fr.yoanndiquelou.jeelight.model.Light;
 import fr.yoanndiquelou.jeelight.model.Method;
 
@@ -110,6 +115,33 @@ public class EasyLightTest {
 		el.toggle();
 
 		verify(mockManager).send(Method.TOGGLE);
+	}
+	
+	@DisplayName("Test start flow")
+	@Test
+	public void testStartFlow() {
+		Light l = new Light();
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(l, mockManager);
+		List<FlowColor> flow = new ArrayList<>();
+		flow.add(new FlowColor(ColorMode.COLOR, 12345, 75, 100));
+		flow.add(new FlowColor(ColorMode.TEMPERATURE, 12345, 75, 100));
+		when(mockManager.send(Method.START_CF, 1,ColorFlowEnd.OFF.getValue(),"100,1,12345,75,100,2,12345,75")).thenReturn(mFut);
+		el.startCf(ColorFlowEnd.OFF, flow);
+
+		verify(mockManager).send(Method.START_CF,2, ColorFlowEnd.OFF.getValue(),"100,1,12345,75,100,2,12345,75");
+	}
+	
+	@DisplayName("Test stop flow")
+	@Test
+	public void testStopFlow() {
+		Light l = new Light();
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(l, mockManager);
+		when(mockManager.send(Method.STOP_CF)).thenReturn(mFut);
+		el.stopCf();
+
+		verify(mockManager).send(Method.STOP_CF);
 	}
 	
 	@DisplayName("Test set color temperature")
