@@ -106,9 +106,8 @@ Don't forger to remove the listener.
 
 # TODO
 
-Actually I need to manage `adjust`, `flows` and `music` methods.
+Actually I need to manage `adjust`, and `music` methods.
 
-I actually need to extends test coverage.
 
 # Conclusion
 Try it yourself and enjoy

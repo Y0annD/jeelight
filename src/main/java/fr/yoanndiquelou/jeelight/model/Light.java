@@ -59,6 +59,9 @@ public class Light {
 	/** Name. */
 	@Property("name")
 	private String mName;
+	/** Delay. */
+	@Property("delayoff")
+	private int mCron;
 	/** List of listeners. */
 	private Set<PropertyChangeListener> mListeners;
 
@@ -68,6 +71,7 @@ public class Light {
 	public Light() {
 		mTasks = new HashSet<>();
 		mListeners = new HashSet<>();
+		mCron = 0;
 	}
 
 	public static Light fromDatagramPacket(InetAddress address, byte[] packetData) {
@@ -357,41 +361,53 @@ public class Light {
 	public void setName(String name) {
 		mName = name;
 	}
-	
+
 	public void addListener(PropertyChangeListener listener) {
 		mListeners.add(listener);
 	}
-	
+
 	public void removeListener(PropertyChangeListener listener) {
 		mListeners.remove(listener);
 	}
-	
+
 	public void notifyListeners(String property, Object oldValue, Object newValue) {
-		for(PropertyChangeListener listener: mListeners) {
+		for (PropertyChangeListener listener : mListeners) {
 			listener.propertyChange(new PropertyChangeEvent(this, property, oldValue, newValue));
 		}
 	}
-	
+
 	/**
 	 * Update property from Yeelight response.
+	 * 
 	 * @param property property to update
-	 * @param param new value
+	 * @param param    new value
 	 * @return the light
 	 * @throws ParameterException parameter exception
 	 */
 	public Light updateFromMethod(String property, String param) throws ParameterException {
-		for(Field field: this.getClass().getDeclaredFields()) {
-			if(field.isAnnotationPresent(Property.class) && field.getAnnotation(Property.class).value().contentEquals(property)) {
+		for (Field field : this.getClass().getDeclaredFields()) {
+			if (field.isAnnotationPresent(Property.class)
+					&& field.getAnnotation(Property.class).value().contentEquals(property)) {
 				try {
 					Object newValue = AttributeParser.parse(param);
 					notifyListeners(property, field.get(this), newValue);
 					field.set(this, newValue);
 				} catch (IllegalArgumentException | IllegalAccessException e) {
-					throw new ParameterException("Unable to set field: " + field.getName() + " with value: " +param, e);
+					throw new ParameterException("Unable to set field: " + field.getName() + " with value: " + param,
+							e);
 				}
 			}
 		}
 		return this;
+	}
+
+	/**
+	 * Return delay before light switch off. 0 if no sleep mode set.
+	 * 
+	 * @return delay before switch off
+	 */
+	public int getCron() {
+		return mCron;
 	}
 
 	@Override
@@ -410,8 +426,9 @@ public class Light {
 		builder.append("RGB: ").append(mRgb).append("\r\n");
 		builder.append("Hue: ").append(mHue).append("\r\n");
 		builder.append("Saturation: ").append(mSaturation).append("\r\n");
+		builder.append("delay off: ").append(mCron).append("\r\n");
 		builder.append("tasks:").append("\r\n");
-		for(String task: mTasks) {
+		for (String task : mTasks) {
 			builder.append("\t").append(task).append("\r\n");
 		}
 		return builder.toString();

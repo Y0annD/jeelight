@@ -92,7 +92,8 @@ public class EasyLight {
 
 	/**
 	 * Start color flow.
-	 * @param end end mode
+	 * 
+	 * @param end  end mode
 	 * @param flow list of changes in flow
 	 */
 	public void startCf(ColorFlowEnd end, List<FlowColor> flow) {
@@ -105,7 +106,7 @@ public class EasyLight {
 		}
 		executeCommand(Method.START_CF, flow.size(), end.getValue(), builder.toString());
 	}
-	
+
 	/**
 	 * Stop color flow.
 	 */
@@ -177,7 +178,33 @@ public class EasyLight {
 //		
 //	}
 
-	// TODO: Cron management
+	/**
+	 * Set time before switch off.
+	 * 
+	 * @param time time before switch off
+	 * @return new time
+	 */
+	public int setCron(int time) {
+		executeCommand(Method.CRON_ADD, 0, time);
+		return mLight.getCron();
+	}
+
+	/**
+	 * Set time before switch off.
+	 * 
+	 * @return time before switch off
+	 */
+	public int getCron() {
+		executeCommand(Method.CRON_GET, 0);
+		return mLight.getCron();
+	}
+	
+	/**
+	 * Delete cron task.
+	 */
+	public void delCron() {
+		executeCommand(Method.CRON_DEL, 0);
+	}
 
 	// TODO: Adjust
 

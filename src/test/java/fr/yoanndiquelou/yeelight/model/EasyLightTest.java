@@ -144,6 +144,44 @@ public class EasyLightTest {
 		verify(mockManager).send(Method.STOP_CF);
 	}
 	
+	@DisplayName("Test add cron")
+	@Test
+	public void testAddCron() {
+		Light l = new Light();
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(l, mockManager);
+		when(mockManager.send(Method.CRON_ADD, 0,1)).thenReturn(mFut);
+		el.setCron(1);
+
+		verify(mockManager).send(Method.CRON_ADD,0,1);
+	}
+	
+	@DisplayName("Test get cron")
+	@Test
+	public void testGetCron() {
+		Light l = new Light();
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(l, mockManager);
+		when(mockManager.send(Method.CRON_GET, 0)).thenReturn(mFut);
+		el.getCron();
+
+		verify(mockManager).send(Method.CRON_GET,0);
+	}
+	
+	@DisplayName("Test del cron")
+	@Test
+	public void testDelCron() {
+		Light l = new Light();
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(l, mockManager);
+		when(mockManager.send(Method.CRON_DEL, 0)).thenReturn(mFut);
+		el.delCron();
+
+		verify(mockManager).send(Method.CRON_DEL,0);
+	}
+	
+	
+	
 	@DisplayName("Test set color temperature")
 	@Test
 	public void testSetCtAbx() {

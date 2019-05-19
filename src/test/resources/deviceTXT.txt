@@ -11,6 +11,7 @@ CT: 4000
 RGB: 16711680
 Hue: 0
 Saturation: 100
+delay off: 0
 tasks:
 	adjust_color
 	get_prop

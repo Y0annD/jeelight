@@ -18,6 +18,7 @@ public enum Method {
 	SET_SCENE("set_scene", String.class, Integer.class, Integer.class),
 	CRON_ADD("cron_add", Integer.class, Integer.class),
 	CRON_GET("cron_get", Integer.class),
+	CRON_DEL("cron_del", Integer.class),
 	SET_ADJUST("set_adjust", String.class, String.class),
 	SET_MUSIC("set_music", Integer.class, String.class, Integer.class),
 	SET_NAME("set_name", String.class),
