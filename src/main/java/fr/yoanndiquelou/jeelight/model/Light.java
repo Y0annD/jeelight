@@ -1,5 +1,8 @@
 package fr.yoanndiquelou.jeelight.model;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.util.HashMap;
@@ -8,6 +11,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import fr.yoanndiquelou.jeelight.annotation.Property;
+import fr.yoanndiquelou.jeelight.exception.ParameterException;
+import fr.yoanndiquelou.jeelight.utils.AttributeParser;
 
 /**
  * Class that describe Light.
@@ -29,27 +36,38 @@ public class Light {
 	/** Supported tasks. */
 	private Set<String> mTasks;
 	/** Power status. */
+	@Property("power")
 	private boolean mPower;
 	/** Brightness. */
+	@Property("bright")
 	private int mBrightness;
 	/** Color mode. */
+	@Property("color_mode")
 	private int mColorMode;
 	/** Ct. */
+	@Property("ct")
 	private int mCt;
 	/** rgb. */
-	private long mRgb;
+	@Property("rgb")
+	private int mRgb;
 	/** Hue. */
+	@Property("hue")
 	private int mHue;
 	/** Saturation. */
+	@Property("sat")
 	private int mSaturation;
 	/** Name. */
+	@Property("name")
 	private String mName;
+	/** List of listeners. */
+	private Set<PropertyChangeListener> mListeners;
 
 	/**
 	 * Empty constructor.
 	 */
 	public Light() {
 		mTasks = new HashSet<>();
+		mListeners = new HashSet<>();
 	}
 
 	public static Light fromDatagramPacket(InetAddress address, byte[] packetData) {
@@ -74,7 +92,7 @@ public class Light {
 		l.setBrightness(Integer.valueOf(headers.get("BRIGHT")));
 		l.setColorMode(Integer.valueOf(headers.get("COLOR_MODE")));
 		l.setCt(Integer.valueOf(headers.get("CT")));
-		l.setRGB(Long.valueOf(headers.get("RGB")));
+		l.setRGB(Integer.valueOf(headers.get("RGB")));
 		l.setHue(Integer.valueOf(headers.get("HUE")));
 		l.setSaturation(Integer.valueOf(headers.get("SAT")));
 		// Add allowed tasks
@@ -273,7 +291,7 @@ public class Light {
 	 * 
 	 * @return rgb value
 	 */
-	public long getRGB() {
+	public int getRGB() {
 		return mRgb;
 	}
 
@@ -282,7 +300,7 @@ public class Light {
 	 * 
 	 * @param rgb rgb
 	 */
-	public void setRGB(long rgb) {
+	public void setRGB(int rgb) {
 		mRgb = rgb;
 	}
 
@@ -338,6 +356,42 @@ public class Light {
 	 */
 	public void setName(String name) {
 		mName = name;
+	}
+	
+	public void addListener(PropertyChangeListener listener) {
+		mListeners.add(listener);
+	}
+	
+	public void removeListener(PropertyChangeListener listener) {
+		mListeners.remove(listener);
+	}
+	
+	public void notifyListeners(String property, Object oldValue, Object newValue) {
+		for(PropertyChangeListener listener: mListeners) {
+			listener.propertyChange(new PropertyChangeEvent(this, property, oldValue, newValue));
+		}
+	}
+	
+	/**
+	 * Update property from Yeelight response.
+	 * @param property property to update
+	 * @param param new value
+	 * @return the light
+	 * @throws ParameterException parameter exception
+	 */
+	public Light updateFromMethod(String property, String param) throws ParameterException {
+		for(Field field: this.getClass().getDeclaredFields()) {
+			if(field.isAnnotationPresent(Property.class) && field.getAnnotation(Property.class).value().contentEquals(property)) {
+				try {
+					Object newValue = AttributeParser.parse(param);
+					notifyListeners(property, field.get(this), newValue);
+					field.set(this, newValue);
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					throw new ParameterException("Unable to set field: " + field.getName() + " with value: " +param, e);
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override

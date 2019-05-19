@@ -9,9 +9,10 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,7 +45,7 @@ public class SSDPClient {
 	/** Listening thread. */
 	private Thread mListeningThread;
 	/** Arriving observable. */
-	private Set<Light> mDevices;
+	private Map<Long, Light> mDevices;
 	/** Listeners to devices change. */
 	private List<PropertyChangeListener> mListeners;
 
@@ -56,7 +57,7 @@ public class SSDPClient {
 		mTimeout = timeout;
 		mServiceType = serviceType;
 		mPort = port;
-		mDevices = new HashSet<>();
+		mDevices = new HashMap<>();
 		mListeners = new ArrayList<>();
 		mListeningThread = new Thread(() -> {
 			try {
@@ -111,8 +112,8 @@ public class SSDPClient {
 	 * 
 	 * @return devices
 	 */
-	public Set<Light> getDevices() {
-		return mDevices;
+	public List<Light> getDevices() {
+		return new ArrayList<>(mDevices.values());
 	}
 
 	/**
@@ -150,8 +151,9 @@ public class SSDPClient {
 	 * @param device new device
 	 */
 	private void addDevice(Light device) {
-		if (mDevices.add(device)) {
-			notifyListeners(this, ADD, mDevices, device);
+		if (!mDevices.containsKey(device.getId())) {
+			mDevices.put(device.getId(), device);
+			notifyListeners(this, ADD, mDevices.values(), device);
 		}
 	}
 
@@ -163,7 +165,7 @@ public class SSDPClient {
 	 * @param devices  devices list
 	 * @param device   new device
 	 */
-	private void notifyListeners(Object object, String property, Set<Light> devices, Light device) {
+	private void notifyListeners(Object object, String property, Collection<Light> devices, Light device) {
 		for (PropertyChangeListener listener : mListeners) {
 			listener.propertyChange(new PropertyChangeEvent(this, property, devices, device));
 		}

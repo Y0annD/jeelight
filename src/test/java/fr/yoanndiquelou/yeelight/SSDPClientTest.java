@@ -4,13 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.net.SocketException;
 
 import org.junit.jupiter.api.DisplayName;
@@ -59,7 +55,32 @@ public class SSDPClientTest {
 		} catch (SocketException e) {
 			fail("Should not catch exception", e);
 		}
+	}
 
+	@Test
+	@DisplayName("testAddDevice")
+	public void testAddDevice() {
+		// TODO: fill the test
+		String service = "test";
+		try {
+			SSDPClient client = new SSDPClient(10000, service, 1234);
+			client.startDiscovering();
+			client.addListener(new PropertyChangeListener() {
+				
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
+			assertTrue(client.isDiscovering());
+			
+			client.stopDiscovering();
+			assertFalse(client.isDiscovering());
+		} catch (SocketException e) {
+			fail("Should not catch exception", e);
+
+		}
 	}
 
 }
