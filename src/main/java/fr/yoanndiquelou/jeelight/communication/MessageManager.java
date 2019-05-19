@@ -36,7 +36,7 @@ public class MessageManager {
 	private static final Pattern notificationResponsePattern = Pattern
 			.compile("\\{\"method\":\"(.*)\",\"params\":(.*)\\}");
 	/** Object matcher. */
-	private static final Pattern objectPattern = Pattern.compile("\"([a-z]*)\":(\\w*)");
+	private static final Pattern objectPattern = Pattern.compile("\"([a-z]*)\":\"?(\\w*)\"?");
 	/** List of listeners. */
 	private List<PropertyChangeListener> mListeners;
 	/** command executor. */
