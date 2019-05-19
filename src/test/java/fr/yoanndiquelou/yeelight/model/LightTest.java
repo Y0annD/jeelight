@@ -98,6 +98,7 @@ public class LightTest {
 
 			byte[] content = Files.readAllBytes(f.toPath());
 			Light light = Light.fromDatagramPacket(addr, content);
+			light.setName("0x42");
 			assertEquals("yeelight://10.42.42.10:55443", light.getLocation());
 			System.out.println(light.toString());
 			assertEquals(new String(Files.readAllBytes(fToString.toPath())).trim(), light.toString().trim());
