@@ -1,5 +1,7 @@
 # Jeelight
 
+[![Build Status](https://travis-ci.com/Y0annD/jeelight.svg?branch=master)](https://travis-ci.com/Y0annD/jeelight)
+
 `Jeelight` is a simple implementation of [Yeelight Inter operation specification](https://www.yeelight.com/download/Yeelight_Inter-Operation_Spec.pdf).
 The aim of jeelight is to manage for you the discovery and communication with differents `Yeelight` devices.
 
