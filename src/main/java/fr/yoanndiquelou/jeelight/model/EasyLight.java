@@ -22,11 +22,22 @@ public class EasyLight {
 	 * @param light     light to manage
 	 * @param messaging messaging to manage light
 	 * @throws ParameterException execption in parameter
-	 * @throws IOException network exception
+	 * @throws IOException        network exception
 	 */
 	public EasyLight(Light light) throws IOException, ParameterException {
 		mLight = light;
 		mMessaging = new MessageManager(light);
+	}
+
+	/**
+	 * EasyLight constructor for testing purposes.
+	 * 
+	 * @param light     light to manage
+	 * @param messaging messaging that manager data
+	 */
+	public EasyLight(Light light, MessageManager messaging) {
+		mLight = light;
+		mMessaging = messaging;
 	}
 
 	/**
@@ -39,6 +50,15 @@ public class EasyLight {
 	}
 
 	/**
+	 * Return effect type.
+	 * 
+	 * @return effect type
+	 */
+	public EffectType getEffectType() {
+		return mEffect;
+	}
+
+	/**
 	 * Set effect duration.
 	 * 
 	 * @param duration duration of the effect
@@ -48,7 +68,15 @@ public class EasyLight {
 			throw new IllegalArgumentException("Duration should be higher than 30 ms");
 		}
 		mDuration = duration;
+	}
 
+	/**
+	 * Return effect duration.
+	 * 
+	 * @return effect duration
+	 */
+	public int getDuration() {
+		return mDuration;
 	}
 
 	/**
@@ -83,8 +111,8 @@ public class EasyLight {
 	}
 
 	public int[] setRgb(int red, int green, int blue) {
-		int newColor = setRgb(red * 65535 + green * 256 + blue);
-		return new int[] { newColor >>4, newColor>>2 & 0xFF, newColor & 0xFF };
+		int newColor = setRgb(red * 65536 + green * 256 + blue);
+		return new int[] { newColor >> 4, newColor >> 2 & 0xFF, newColor & 0xFF };
 	}
 
 	public int setRgb(int mergedValue) {
@@ -96,7 +124,7 @@ public class EasyLight {
 		if (hue < 0 || hue > 359) {
 			throw new IllegalArgumentException("Hue must be positive and lower than 360");
 		}
-		if (sat < sat || sat > 100) {
+		if (sat < 0 || sat > 100) {
 			throw new IllegalArgumentException("Sat must be positive and lower than 100");
 		}
 		executeCommand(Method.SET_HSV, new Object[] { hue, sat, mEffect.getValue(), mDuration });
@@ -108,35 +136,34 @@ public class EasyLight {
 	 * @return
 	 */
 	public int setBright(int bright) {
-		if (0 < bright && bright > 100) {
+		if (bright < 0  || bright > 100) {
 			throw new IllegalArgumentException("Bright must be positive and lower than 100");
 		}
 		executeCommand(Method.SET_BRIGHT, bright, mEffect.getValue(), mDuration);
 		return mLight.getBrightness();
 	}
-	
+
 	public boolean setPower(boolean power) {
-		executeCommand(Method.SET_POWER, (power?"On":"Off"), mEffect, mDuration);
+		executeCommand(Method.SET_POWER, getPowerStr(power), mEffect.getValue(), mDuration);
 		return mLight.isPower();
 	}
-	
+
 	// TODO: Color flow management
 //	public startCf() {
 //		
 //	}
-	
+
 	// TODO: Scene management
 //	public void setScene() {
 //		
 //	}
-	
+
 	// TODO: Cron management
-	
+
 	// TODO: Adjust
-	
+
 	// TODO: Music
-	
-	
+
 	/**
 	 * Toggle Light status.
 	 * 
@@ -159,7 +186,7 @@ public class EasyLight {
 	 * @param effect      effect
 	 * @param duration    Should be higher or equals than 30 ms
 	 */
-	public int setbgCtAbx(int temperature) {
+	public int setBgCtAbx(int temperature) {
 		if (temperature > 6500 || temperature < 1700) {
 			throw new IllegalArgumentException("Color temperature should be between 1700K and 6500K");
 		}
@@ -169,8 +196,8 @@ public class EasyLight {
 	}
 
 	public int[] setBgRgb(int red, int green, int blue) {
-		int newColor = setRgb(red * 65535 + green * 256 + blue);
-		return new int[] { newColor >>4, newColor>>2 & 0xFF, newColor & 0xFF };
+		int newColor = setBgRgb(red * 65536 + green * 256 + blue);
+		return new int[] { newColor >> 4, newColor >> 2 & 0xFF, newColor & 0xFF };
 	}
 
 	public int setBgRgb(int mergedValue) {
@@ -194,19 +221,25 @@ public class EasyLight {
 	 * @return
 	 */
 	public int setBgBright(int bright) {
-		if (0 < bright && bright > 100) {
+		if (bright <0 || bright > 100) {
 			throw new IllegalArgumentException("Bright must be positive and lower than 100");
 		}
 		executeCommand(Method.BG_SET_BRIGHT, bright, mEffect.getValue(), mDuration);
 		return mLight.getBrightness();
 	}
+
+	private String getPowerStr(boolean power) {
+		return (power ? "On" : "Off");
+	}
 	
 	public boolean setBgPower(boolean power) {
-		executeCommand(Method.BG_SET_POWER, (power?"On":"Off"), mEffect, mDuration);
+		executeCommand(Method.BG_SET_POWER, getPowerStr(power), mEffect.getValue(), mDuration);
 		return mLight.isPower();
 	}
+
 	/**
 	 * Set device name.
+	 * 
 	 * @param name device name
 	 * @return new Device name
 	 */
@@ -214,7 +247,7 @@ public class EasyLight {
 		executeCommand(Method.SET_NAME, name);
 		return mLight.getName();
 	}
-	
+
 	private void executeCommand(Method method, Object... params) {
 		Future<Boolean> result = mMessaging.send(method, params);
 		while (!result.isDone()) {

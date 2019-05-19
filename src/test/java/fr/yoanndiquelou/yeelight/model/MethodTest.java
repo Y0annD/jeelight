@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import fr.yoanndiquelou.jeelight.exception.ParameterException;
+import fr.yoanndiquelou.jeelight.model.EffectType;
 import fr.yoanndiquelou.jeelight.model.Method;
 
 /**
@@ -34,7 +35,7 @@ public class MethodTest {
 	public void testCheckSuccess() {
 		Method m = Method.SET_POWER;
 		try {
-			m.check("off", "smooth", 500);
+			m.check("off", EffectType.SMOOTH.getValue(), 500);
 			assertTrue(true);
 
 		} catch (ParameterException e) {
@@ -50,7 +51,7 @@ public class MethodTest {
 	public void testCheckFailParameterLength() {
 		Method m = Method.SET_POWER;
 		Exception e = assertThrows(ParameterException.class, () -> {
-			m.check("off", "smooth");
+			m.check("off", EffectType.SMOOTH.getValue());
 		});
 		assertEquals("Found 2 parameters but expect 3", e.getMessage());
 	}
@@ -63,7 +64,7 @@ public class MethodTest {
 	public void testCheckFailParameterType() {
 		Method m = Method.SET_POWER;
 		Exception e = assertThrows(ParameterException.class, () -> {
-			m.check("off", "smooth", "type");
+			m.check("off", EffectType.SMOOTH.getValue(), "type");
 		});
 		assertEquals("Parameter at index 2 is incorrect. Integer waited, but found String", e.getMessage());
 	}

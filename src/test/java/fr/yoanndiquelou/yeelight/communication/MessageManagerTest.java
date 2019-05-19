@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -113,6 +115,19 @@ public class MessageManagerTest {
 		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buf);
 		when(socketMock.getOutputStream()).thenReturn(byteArrayOutputStream);
 		when(socketMock.getInputStream()).thenReturn(byteArrayInputStream);
+		l.addListener(new PropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if(null != evt) {
+					assertEquals("power", evt.getPropertyName());
+					assertEquals(false, evt.getOldValue());
+					assertEquals(true, evt.getNewValue());
+					l.removeListener(this);
+				}
+				
+			}
+		});
 		try {
 			MessageManager m = new MessageManager(l, socketMock);
 
@@ -120,7 +135,6 @@ public class MessageManagerTest {
 			presponse.setAccessible(true);
 			presponse.invoke(m, "{\"method\":\"props\",\"params\":{\"power\":\"on\"}}");
 			assertTrue(l.isPower());
-
 		} catch (ParameterException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			fail("Should not catch exception", e);
 		}
