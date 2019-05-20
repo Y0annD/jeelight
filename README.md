@@ -14,6 +14,10 @@ To do this, open your `Yeelight` mobile application,
 - Click in the button that look like an `Up Arrow`
 - Check that the button `Control on local network` is checked
 
+# Dependencies
+
+The `Jeelight` only depends on `log4j2` library.
+
 ## Discovering devices
 
 The device discovery is based on `SSDP protocol`. 
@@ -108,7 +112,7 @@ Don't forger to remove the listener.
 
 # TODO
 
-Actually I need to manage `adjust`, and `music` methods.
+Actually I need to manage `music` methods.
 
 
 # Conclusion

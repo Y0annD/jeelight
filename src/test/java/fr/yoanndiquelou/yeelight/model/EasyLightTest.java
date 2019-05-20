@@ -17,6 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import fr.yoanndiquelou.jeelight.communication.MessageManager;
+import fr.yoanndiquelou.jeelight.model.AdjustType;
 import fr.yoanndiquelou.jeelight.model.ColorFlowEnd;
 import fr.yoanndiquelou.jeelight.model.ColorMode;
 import fr.yoanndiquelou.jeelight.model.EasyLight;
@@ -375,6 +376,144 @@ public class EasyLightTest {
 		verify(mockManager).send(Method.BG_SET_BRIGHT, 1, EffectType.SMOOTH.getValue(), 100);
 	}
 	
+	@DisplayName("Test adjust brightness")
+	@Test
+	public void testAdjustBright() {
+		Light l = new Light();
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(l, mockManager);
+
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.adjustBright(-101, 30);
+		});
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.adjustBright(101, 30);
+		});
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.adjustBright(100, 29);
+		});
+		
+		when(mockManager.send(Method.ADJUST_BRIGHT, 100, 30)).thenReturn(mFut);
+		el.adjustBright(100,30);
+
+		verify(mockManager).send(Method.ADJUST_BRIGHT, 100, 30);
+	}
+	
+	@DisplayName("Test adjust color temperature")
+	@Test
+	public void testAdjustCt() {
+		Light l = new Light();
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(l, mockManager);
+
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.adjustColorTemperature(-101, 30);
+		});
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.adjustColorTemperature(101, 30);
+		});
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.adjustColorTemperature(100, 29);
+		});
+		
+		when(mockManager.send(Method.ADJUST_CT, 100, 30)).thenReturn(mFut);
+		el.adjustColorTemperature(100,30);
+
+		verify(mockManager).send(Method.ADJUST_CT, 100, 30);
+	}
+	
+	@DisplayName("Test adjust color")
+	@Test
+	public void testAdjustColor() {
+		Light l = new Light();
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(l, mockManager);
+
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.adjustColor(-101, 30);
+		});
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.adjustColor(101, 30);
+		});
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.adjustColor(100, 29);
+		});
+		
+		when(mockManager.send(Method.ADJUST_COLOR, 100, 30)).thenReturn(mFut);
+		el.adjustColor(100,30);
+
+		verify(mockManager).send(Method.ADJUST_COLOR, 100, 30);
+	}
+	
+	@DisplayName("Test adjust background brightness")
+	@Test
+	public void testBgAdjustBright() {
+		Light l = new Light();
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(l, mockManager);
+
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.bgAdjustBright(-101, 30);
+		});
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.bgAdjustBright(101, 30);
+		});
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.bgAdjustBright(100, 29);
+		});
+		
+		when(mockManager.send(Method.BG_ADJUST_BRIGHT, 100, 30)).thenReturn(mFut);
+		el.bgAdjustBright(100,30);
+
+		verify(mockManager).send(Method.BG_ADJUST_BRIGHT, 100, 30);
+	}
+	
+	@DisplayName("Test adjust background color temperature")
+	@Test
+	public void testBgAdjustCt() {
+		Light l = new Light();
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(l, mockManager);
+
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.bgAdjustColorTemperature(-101, 30);
+		});
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.bgAdjustColorTemperature(101, 30);
+		});
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.bgAdjustColorTemperature(100, 29);
+		});
+		
+		when(mockManager.send(Method.BG_ADJUST_CT, 100, 30)).thenReturn(mFut);
+		el.bgAdjustColorTemperature(100,30);
+
+		verify(mockManager).send(Method.BG_ADJUST_CT, 100, 30);
+	}
+	
+	@DisplayName("Test adjust background color")
+	@Test
+	public void testBgAdjustColor() {
+		Light l = new Light();
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(l, mockManager);
+
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.bgAdjustColor(-101, 30);
+		});
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.bgAdjustColor(101, 30);
+		});
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.bgAdjustColor(100, 29);
+		});
+		
+		when(mockManager.send(Method.BG_ADJUST_COLOR, 100, 30)).thenReturn(mFut);
+		el.bgAdjustColor(100,30);
+
+		verify(mockManager).send(Method.BG_ADJUST_COLOR, 100, 30);
+	}
+	
 	@DisplayName("Test set background power")
 	@Test
 	public void testSetBgPower() {
@@ -386,5 +525,45 @@ public class EasyLightTest {
 		el.setBgPower(false);
 
 		verify(mockManager).send(Method.BG_SET_POWER, "Off", EffectType.SMOOTH.getValue(), 100);
+	}
+	
+	@DisplayName("Test set adjust")
+	@Test
+	public void testSetAdjust() {
+		Light l = new Light();
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(l, mockManager);
+
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.setAdjust(AdjustType.INCREASE,"color");
+		});
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.setAdjust(AdjustType.INCREASE,"fake");
+		});
+		
+		when(mockManager.send(Method.SET_ADJUST, AdjustType.INCREASE.getValue(), "bright")).thenReturn(mFut);
+		el.setAdjust(AdjustType.INCREASE, "bright");
+
+		verify(mockManager).send(Method.SET_ADJUST, AdjustType.INCREASE.getValue(), "bright");
+	}
+	
+	@DisplayName("Test set background adjust")
+	@Test
+	public void testSetBgAdjust() {
+		Light l = new Light();
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(l, mockManager);
+
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.setBgAdjust(AdjustType.INCREASE,"color");
+		});
+		assertThrows(IllegalArgumentException.class, ()->{
+			el.setBgAdjust(AdjustType.INCREASE,"fake");
+		});
+		
+		when(mockManager.send(Method.BG_SET_ADJUST, AdjustType.CIRCLE.getValue(), "color")).thenReturn(mFut);
+		el.setBgAdjust(AdjustType.CIRCLE, "color");
+
+		verify(mockManager).send(Method.BG_SET_ADJUST, AdjustType.CIRCLE.getValue(), "color");
 	}
 }

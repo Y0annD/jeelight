@@ -115,6 +115,114 @@ public class EasyLight {
 	}
 
 	/**
+	 * Adjust brightness.
+	 * 
+	 * @param percentage percentage of brightness
+	 * @param duration   duration of changement
+	 * @return new brightness
+	 */
+	public int adjustBright(int percentage, int duration) {
+		if (percentage < -100 || percentage > 100) {
+			throw new IllegalArgumentException("Percentage attribute must be positive and lower than 101%");
+		}
+		if (duration < 30) {
+			throw new IllegalArgumentException("Duration must be higher than 29ms");
+		}
+		executeCommand(Method.ADJUST_BRIGHT, percentage, duration);
+		return mLight.getBrightness();
+	}
+	
+	/**
+	 * Adjust color temperature.
+	 * 
+	 * @param percentage percentage of color temperature
+	 * @param duration   duration of changement
+	 * @return new brightness
+	 */
+	public int adjustColorTemperature(int percentage, int duration) {
+		if (percentage < -100 || percentage > 100) {
+			throw new IllegalArgumentException("Percentage attribute must be positive and lower than 101%");
+		}
+		if (duration < 30) {
+			throw new IllegalArgumentException("Duration must be higher than 29ms");
+		}
+		executeCommand(Method.ADJUST_CT, percentage, duration);
+		return mLight.getBrightness();
+	}
+	
+	/**
+	 * Adjust color.
+	 * 
+	 * @param percentage percentage of color temperature
+	 * @param duration   duration of changement
+	 * @return new brightness
+	 */
+	public int adjustColor(int percentage, int duration) {
+		if (percentage < -100 || percentage > 100) {
+			throw new IllegalArgumentException("Percentage attribute must be positive and lower than 101%");
+		}
+		if (duration < 30) {
+			throw new IllegalArgumentException("Duration must be higher than 29ms");
+		}
+		executeCommand(Method.ADJUST_COLOR, percentage, duration);
+		return mLight.getBrightness();
+	}
+	
+	/**
+	 * Adjust brightness.
+	 * 
+	 * @param percentage percentage of brightness
+	 * @param duration   duration of changement
+	 * @return new brightness
+	 */
+	public int bgAdjustBright(int percentage, int duration) {
+		if (percentage < -100 || percentage > 100) {
+			throw new IllegalArgumentException("Percentage attribute must be positive and lower than 101%");
+		}
+		if (duration < 30) {
+			throw new IllegalArgumentException("Duration must be higher than 29ms");
+		}
+		executeCommand(Method.BG_ADJUST_BRIGHT, percentage, duration);
+		return mLight.getBrightness();
+	}
+	
+	/**
+	 * Adjust color temperature.
+	 * 
+	 * @param percentage percentage of color temperature
+	 * @param duration   duration of changement
+	 * @return new brightness
+	 */
+	public int bgAdjustColorTemperature(int percentage, int duration) {
+		if (percentage < -100 || percentage > 100) {
+			throw new IllegalArgumentException("Percentage attribute must be positive and lower than 101%");
+		}
+		if (duration < 30) {
+			throw new IllegalArgumentException("Duration must be higher than 29ms");
+		}
+		executeCommand(Method.BG_ADJUST_CT, percentage, duration);
+		return mLight.getBrightness();
+	}
+	
+	/**
+	 * Adjust color.
+	 * 
+	 * @param percentage percentage of color temperature
+	 * @param duration   duration of changement
+	 * @return new brightness
+	 */
+	public int bgAdjustColor(int percentage, int duration) {
+		if (percentage < -100 || percentage > 100) {
+			throw new IllegalArgumentException("Percentage attribute must be positive and lower than 101%");
+		}
+		if (duration < 30) {
+			throw new IllegalArgumentException("Duration must be higher than 29ms");
+		}
+		executeCommand(Method.BG_ADJUST_COLOR, percentage, duration);
+		return mLight.getBrightness();
+	}
+
+	/**
 	 * Define color temperature.
 	 * 
 	 * @param temperature color temperature Should be:
@@ -198,7 +306,7 @@ public class EasyLight {
 		executeCommand(Method.CRON_GET, 0);
 		return mLight.getCron();
 	}
-	
+
 	/**
 	 * Delete cron task.
 	 */
@@ -206,7 +314,27 @@ public class EasyLight {
 		executeCommand(Method.CRON_DEL, 0);
 	}
 
-	// TODO: Adjust
+	/**
+	 * Adjust property.
+	 * 
+	 * @param adjust   adjust type
+	 * @param property property to adjust. On of
+	 *                 <ul>
+	 *                 <li>ct</li>
+	 *                 <li>bright</li>
+	 *                 <li>color</li>
+	 *                 </ul>
+	 */
+	public void setAdjust(AdjustType adjust, String property) {
+		if ("ct".equals(property) || "bright".equals(property) || "color".equals(property)) {
+			if ("color".equals(property) && adjust != AdjustType.CIRCLE) {
+				throw new IllegalArgumentException("When color property is set, adjust type must be AdjustType.CIRCLE");
+			}
+			executeCommand(Method.SET_ADJUST, adjust.getValue(), property);
+		} else {
+			throw new IllegalArgumentException("Bad property. One of \"ct\", \"bright\" or \"color\" expected");
+		}
+	}
 
 	// TODO: Music
 
@@ -281,6 +409,28 @@ public class EasyLight {
 	public boolean setBgPower(boolean power) {
 		executeCommand(Method.BG_SET_POWER, getPowerStr(power), mEffect.getValue(), mDuration);
 		return mLight.isPower();
+	}
+
+	/**
+	 * Adjust bg property.
+	 * 
+	 * @param adjust   adjust type
+	 * @param property property to adjust. On of
+	 *                 <ul>
+	 *                 <li>ct</li>
+	 *                 <li>bright</li>
+	 *                 <li>color</li>
+	 *                 </ul>
+	 */
+	public void setBgAdjust(AdjustType adjust, String property) {
+		if ("ct".equals(property) || "bright".equals(property) || "color".equals(property)) {
+			if ("color".equals(property) && adjust != AdjustType.CIRCLE) {
+				throw new IllegalArgumentException("When color property is set, adjust type must be AdjustType.CIRCLE");
+			}
+			executeCommand(Method.BG_SET_ADJUST, adjust.getValue(), property);
+		} else {
+			throw new IllegalArgumentException("Bad property. One of \"ct\", \"bright\" or \"color\" expected");
+		}
 	}
 
 	/**
