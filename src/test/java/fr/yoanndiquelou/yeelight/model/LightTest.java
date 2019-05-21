@@ -1,6 +1,7 @@
 package fr.yoanndiquelou.yeelight.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -42,12 +43,20 @@ public class LightTest {
 		mLight.setModel(model);
 		mLight.setFirmware(1);
 		mLight.setPower(true);
+		mLight.setBgPower(false);
 		mLight.setBrightness(1);
+		mLight.setBgBrightness(51);
 		mLight.setColorMode(1);
+		mLight.setBgColorMode(2);
 		mLight.setCt(1);
+		mLight.setBgCt(1800);
 		mLight.setRGB(1);
+		mLight.setBgRGB(1900);
 		mLight.setHue(1);
+		mLight.setBgHue(10);
 		mLight.setSaturation(1);
+		mLight.setBgSaturation(78);
+		mLight.setActiveMode(1);
 		mLight.setName(name);
 	}
 
@@ -62,13 +71,21 @@ public class LightTest {
 		assertEquals(model, mLight.getModel());
 		assertEquals(1, mLight.getFirmware());
 		assertTrue(mLight.isPower());
+		assertFalse(mLight.isBgPower());
 		assertEquals(1, mLight.getBrightness());
+		assertEquals(51, mLight.getBgBrightness());
 		assertEquals(1, mLight.getColorMode());
+		assertEquals(2, mLight.getBgColorMode());
 		assertEquals(1, mLight.getCt());
+		assertEquals(1800, mLight.getBgCt());
 		assertEquals(1, mLight.getRGB());
+		assertEquals(1900, mLight.getBgRGB());
 		assertEquals(1, mLight.getHue());
+		assertEquals(10, mLight.getBgHue());
 		assertEquals(1, mLight.getSaturation());
+		assertEquals(78, mLight.getBgSaturation());
 		assertEquals(name, mLight.getName());
+		assertEquals(1, mLight.getActiveMode());
 		assertTrue( mLight.getTasks().isEmpty());
 	}
 	

@@ -38,30 +38,77 @@ public class Light {
 	/** Power status. */
 	@Property("power")
 	private boolean mPower;
+	/** Background power status. */
+	@Property("bg_power")
+	private boolean mBgPower;
 	/** Brightness. */
 	@Property("bright")
 	private int mBrightness;
+	/** Background brightness. */
+	@Property("bg_bright")
+	private int mBgBrightness;
 	/** Color mode. */
 	@Property("color_mode")
 	private int mColorMode;
-	/** Ct. */
+	/** Background color mode. */
+	@Property("bg_lmode")
+	private int mBgColorMode;
+	/** Color temperature. */
 	@Property("ct")
 	private int mCt;
+	/** Background color temperature. */
+	@Property("bg_ct")
+	private int mBgCt;
 	/** rgb. */
 	@Property("rgb")
 	private int mRgb;
+	/** Background color. */
+	@Property("bg_rgb")
+	private int mBgRgb;
 	/** Hue. */
 	@Property("hue")
 	private int mHue;
+	/** Background hue. */
+	@Property("bg_hue")
+	private int mBgHue;
 	/** Saturation. */
 	@Property("sat")
 	private int mSaturation;
+	/** Background saturation. */
+	@Property("bg_sat")
+	private int mBgSaturation;
 	/** Name. */
 	@Property("name")
 	private String mName;
 	/** Delay. */
 	@Property("delayoff")
 	private int mCron;
+	/** Flowing. */
+	@Property("flowing")
+	private int mFlowing;
+	/** Background flowing. */
+	@Property("bg_flowing")
+	private int mBgFlowing;
+	/** Flow params. */
+	@Property("flow_params")
+	private String mFlowParams = "";
+	/** Background flow params. */
+	@Property("bg_flow_params")
+	private String mBgFlowParams = "";
+	/** Music On. */
+	@Property("music_on")
+	private int mMusic;
+	/** Brightness of night mode. */
+	@Property("nl_br")
+	private int mNightBright;
+	/**
+	 * Active mode.
+	 * <p>
+	 * Only for ceiling light.
+	 * </p>
+	 */
+	@Property("active_mode")
+	private int mActiveMode;
 	/** List of listeners. */
 	private Set<PropertyChangeListener> mListeners;
 
@@ -74,6 +121,13 @@ public class Light {
 		mCron = 0;
 	}
 
+	/**
+	 * Fill light from datagram packet.
+	 * 
+	 * @param address    adress of light
+	 * @param packetData received packet
+	 * @return light object
+	 */
 	public static Light fromDatagramPacket(InetAddress address, byte[] packetData) {
 		Light l = new Light();
 		Map<String, String> headers = new HashMap<>();
@@ -111,10 +165,20 @@ public class Light {
 		return l;
 	}
 
+	/**
+	 * Set light IP.
+	 * 
+	 * @param ip ip of light
+	 */
 	public void setIp(String ip) {
 		mIp = ip;
 	}
 
+	/**
+	 * Get IP of light.
+	 * 
+	 * @return ip of light
+	 */
 	public String getIp() {
 		return mIp;
 	}
@@ -237,6 +301,24 @@ public class Light {
 	}
 
 	/**
+	 * Get background power status.
+	 * 
+	 * @return background power status
+	 */
+	public boolean isBgPower() {
+		return mBgPower;
+	}
+
+	/**
+	 * Set background power status.
+	 * 
+	 * @param power background power status
+	 */
+	public void setBgPower(boolean power) {
+		mBgPower = power;
+	}
+
+	/**
 	 * Set the brightness.
 	 * 
 	 * @return light brightness
@@ -252,6 +334,24 @@ public class Light {
 	 */
 	public void setBrightness(int brightness) {
 		mBrightness = brightness;
+	}
+
+	/**
+	 * Set the background brightness.
+	 * 
+	 * @return light background brightness
+	 */
+	public int getBgBrightness() {
+		return mBgBrightness;
+	}
+
+	/**
+	 * Set background brightness.
+	 * 
+	 * @param brightness background brightness
+	 */
+	public void setBgBrightness(int brightness) {
+		mBgBrightness = brightness;
 	}
 
 	/**
@@ -273,7 +373,25 @@ public class Light {
 	}
 
 	/**
-	 * CT?
+	 * Get the background color mode.
+	 * 
+	 * @return background color mode
+	 */
+	public int getBgColorMode() {
+		return mBgColorMode;
+	}
+
+	/**
+	 * Background Color mode.
+	 * 
+	 * @param background colorMode colormode
+	 */
+	public void setBgColorMode(int colorMode) {
+		mBgColorMode = colorMode;
+	}
+
+	/**
+	 * Color temperature.
 	 * 
 	 * @return ct
 	 */
@@ -282,12 +400,30 @@ public class Light {
 	}
 
 	/**
-	 * CT?
+	 * Color temperature.
 	 * 
 	 * @param ct ct
 	 */
 	public void setCt(int ct) {
 		this.mCt = ct;
+	}
+
+	/**
+	 * Background Color temperature.
+	 * 
+	 * @return background ct
+	 */
+	public int getBgCt() {
+		return mBgCt;
+	}
+
+	/**
+	 * Background Color temperature.
+	 * 
+	 * @param ct ct
+	 */
+	public void setBgCt(int ct) {
+		this.mBgCt = ct;
 	}
 
 	/**
@@ -309,6 +445,24 @@ public class Light {
 	}
 
 	/**
+	 * Get background RGB value.
+	 * 
+	 * @return rgb value
+	 */
+	public int getBgRGB() {
+		return mBgRgb;
+	}
+
+	/**
+	 * Set background RGB value.
+	 * 
+	 * @param rgb rgb
+	 */
+	public void setBgRGB(int rgb) {
+		mBgRgb = rgb;
+	}
+
+	/**
 	 * Get Hue.
 	 * 
 	 * @return hue
@@ -324,6 +478,24 @@ public class Light {
 	 */
 	public void setHue(int hue) {
 		mHue = hue;
+	}
+
+	/**
+	 * Get background Hue.
+	 * 
+	 * @return background hue
+	 */
+	public int getBgHue() {
+		return mBgHue;
+	}
+
+	/**
+	 * Set background Hue.
+	 * 
+	 * @param hue hue
+	 */
+	public void setBgHue(int hue) {
+		mBgHue = hue;
 	}
 
 	/**
@@ -345,6 +517,24 @@ public class Light {
 	}
 
 	/**
+	 * Get background saturation.
+	 * 
+	 * @return saturation
+	 */
+	public int getBgSaturation() {
+		return mBgSaturation;
+	}
+
+	/**
+	 * Set background saturation.
+	 * 
+	 * @param saturation saturation
+	 */
+	public void setBgSaturation(int saturation) {
+		mBgSaturation = saturation;
+	}
+
+	/**
 	 * Get name of the light.
 	 * 
 	 * @return light name
@@ -362,10 +552,41 @@ public class Light {
 		mName = name;
 	}
 
+	/**
+	 * Set active mode.
+	 * <p>
+	 * Only for ceiling light.
+	 * </p>
+	 * 
+	 * @param mode active mode.
+	 */
+	public void setActiveMode(int mode) {
+		mActiveMode = mode;
+	}
+
+	/**
+	 * Return active mode.
+	 * 
+	 * @return active mode
+	 */
+	public int getActiveMode() {
+		return mActiveMode;
+	}
+
+	/**
+	 * Add light listener.
+	 * 
+	 * @param listener listener to add
+	 */
 	public void addListener(PropertyChangeListener listener) {
 		mListeners.add(listener);
 	}
 
+	/**
+	 * Remove listener.
+	 * 
+	 * @param listener listener to remove
+	 */
 	public void removeListener(PropertyChangeListener listener) {
 		mListeners.remove(listener);
 	}
@@ -413,23 +634,14 @@ public class Light {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Name: ").append(mName).append("\r\n");
-		builder.append("IP: ").append(mIp).append("\r\n");
-		builder.append("Location: ").append(mLocation).append("\r\n");
-		builder.append("Id: ").append(mId).append("\r\n");
-		builder.append("Model: ").append(mModel).append("\r\n");
-		builder.append("Firmware: ").append(mFirmware).append("\r\n");
-		builder.append("power: ").append((mPower ? "on" : "off")).append("\r\n");
-		builder.append("Brightness: ").append(mBrightness).append("\r\n");
-		builder.append("Color mode: ").append(mColorMode).append("\r\n");
-		builder.append("CT: ").append(mCt).append("\r\n");
-		builder.append("RGB: ").append(mRgb).append("\r\n");
-		builder.append("Hue: ").append(mHue).append("\r\n");
-		builder.append("Saturation: ").append(mSaturation).append("\r\n");
-		builder.append("delay off: ").append(mCron).append("\r\n");
-		builder.append("tasks:").append("\r\n");
-		for (String task : mTasks) {
-			builder.append("\t").append(task).append("\r\n");
+		for (Field field : this.getClass().getDeclaredFields()) {
+			if (field.isAnnotationPresent(Property.class)) {
+				try {
+					builder.append(field.getAnnotation(Property.class).value()).append(": ")
+							.append(field.get(this).toString()).append("\r\n");
+				} catch (IllegalAccessException e) {
+				}
+			}
 		}
 		return builder.toString();
 	}

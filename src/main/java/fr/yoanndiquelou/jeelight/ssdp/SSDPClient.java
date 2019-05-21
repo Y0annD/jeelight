@@ -80,7 +80,7 @@ public class SSDPClient {
 						addDevice(Light.fromDatagramPacket(receivePacket.getAddress(), receivePacket.getData()));
 
 					} catch (SocketTimeoutException e) {
-						logger.debug("");
+						// Do nothing
 					}
 				}
 				clientSocket.close();

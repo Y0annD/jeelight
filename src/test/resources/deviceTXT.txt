@@ -1,35 +1,23 @@
-Name: 0x42
-IP: 0.0.0.66
-Location: yeelight://10.42.42.10:55443
-Id: 54683643
-Model: stripe
-Firmware: 50
-power: off
-Brightness: 100
-Color mode: 1
-CT: 4000
-RGB: 16711680
-Hue: 0
-Saturation: 100
-delay off: 0
-tasks:
-	adjust_color
-	get_prop
-	set_adjust
-	cron_del
-	set_rgb
-	adjust_ct
-	set_scene
-	set_power
-	toggle
-	stop_cf
-	cron_add
-	set_music
-	set_ct_abx
-	set_name
-	cron_get
-	set_hsv
-	start_cf
-	set_default
-	set_bright
-	adjust_bright
+power: false
+bg_power: false
+bright: 100
+bg_bright: 0
+color_mode: 1
+bg_lmode: 0
+ct: 4000
+bg_ct: 0
+rgb: 16711680
+bg_rgb: 0
+hue: 0
+bg_hue: 0
+sat: 100
+bg_sat: 0
+name: 0x42
+delayoff: 0
+flowing: 0
+bg_flowing: 0
+flow_params: 
+bg_flow_params: 
+music_on: 0
+nl_br: 0
+active_mode: 0
