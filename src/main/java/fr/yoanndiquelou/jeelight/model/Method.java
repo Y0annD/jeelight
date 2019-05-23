@@ -1,7 +1,9 @@
 package fr.yoanndiquelou.jeelight.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import fr.yoanndiquelou.jeelight.exception.ParameterException;
 
@@ -33,6 +35,15 @@ public enum Method {
 	private String mName;
 	/** List of attributes types. */
 	private List<Class<?>> mParamTypes;
+
+	/** Method map to avoid searching. */
+	public static Map<String, Method> mMethodMap = new HashMap<>();
+
+	static {
+		for (Method m : values()) {
+			mMethodMap.put(m.getName(), m);
+		}
+	}
 
 	/**
 	 * Method constructor.

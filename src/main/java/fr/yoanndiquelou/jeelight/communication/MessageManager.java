@@ -185,30 +185,38 @@ public class MessageManager {
 			params = params.substring(1, params.length() - 1);
 			logger.debug("Method: {}, params: {}", method, params);
 			if ("props".equals(method)) {
-				// Split by ,
-				String[] splittedParams = params.split(",");
-				for (String param : splittedParams) {
-					Matcher paramMatcher = objectPattern.matcher(param);
-					if (paramMatcher.matches()) {
-
-						String property = paramMatcher.group(1);
-						String value = paramMatcher.group(2).replaceAll("\"", "");
-						logger.debug("Property: {}, value: {}", property, value);
-						try {
-							mLight.updateFromMethod(property, value);
-						} catch (ParameterException e) {
-							logger.error("Wrong notification", e);
-						}
-					} else {
-						logger.debug("No");
-					}
-				}
-
+				processPropertyNotification(params);
 			} else {
 				logger.error("Unknown notification", notification);
 			}
 		} else {
 			logger.error("Notification response isn't correctly formated", notification);
+		}
+	}
+
+	/**
+	 * Process property notification.
+	 * 
+	 * @param params parameters
+	 */
+	private void processPropertyNotification(String params) {
+		// Split by ,
+		String[] splittedParams = params.split(",");
+		for (String param : splittedParams) {
+			Matcher paramMatcher = objectPattern.matcher(param);
+			if (paramMatcher.matches()) {
+
+				String property = paramMatcher.group(1);
+				String value = paramMatcher.group(2).replaceAll("\"", "");
+				logger.debug("Property: {}, value: {}", property, value);
+				try {
+					mLight.updateFromMethod(property, value);
+				} catch (ParameterException e) {
+					logger.error("Wrong notification", e);
+				}
+			} else {
+				logger.debug("Not a correct parameter");
+			}
 		}
 	}
 

@@ -15,6 +15,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import fr.yoanndiquelou.jeelight.model.Light;
+import fr.yoanndiquelou.jeelight.model.Method;
 
 /**
  * Test light class.
@@ -86,7 +87,7 @@ public class LightTest {
 		assertEquals(78, mLight.getBgSaturation());
 		assertEquals(name, mLight.getName());
 		assertEquals(1, mLight.getActiveMode());
-		assertTrue( mLight.getTasks().isEmpty());
+		assertTrue( mLight.getAvailableMethods().isEmpty());
 	}
 	
 	/**
@@ -95,14 +96,14 @@ public class LightTest {
 	@Test
 	@DisplayName("testTasks")
 	public void testTasks() {
-		String taskName = "name";
-		mLight.addTask(taskName);
-		assertEquals(1, mLight.getTasks().size());
-		assertTrue(mLight.getTasks().contains(taskName));
-		mLight.addTask(taskName);
-		assertEquals(1, mLight.getTasks().size());
-		mLight.removeTask(taskName);
-		assertTrue(mLight.getTasks().isEmpty());
+		Method method = Method.ADJUST_BRIGHT;
+		mLight.addMethod(method);
+		assertEquals(1, mLight.getAvailableMethods().size());
+		assertTrue(mLight.getAvailableMethods().contains(method));
+		mLight.addMethod(method);
+		assertEquals(1, mLight.getAvailableMethods().size());
+		mLight.removeMethod(method);
+		assertTrue(mLight.getAvailableMethods().isEmpty());
 	}
 	
 	@Test
@@ -119,6 +120,7 @@ public class LightTest {
 			light.setIp("0.0.0.66");
 			assertEquals("yeelight://10.42.42.10:55443", light.getLocation());
 			assertEquals(new String(Files.readAllBytes(fToString.toPath())).trim(), light.toString().trim());
+			assertEquals(20, light.getAvailableMethods().size());
 		} catch (IOException  e) {
 			fail("Unable to test static construction", e);
 		}

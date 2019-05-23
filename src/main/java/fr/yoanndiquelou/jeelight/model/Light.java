@@ -33,8 +33,6 @@ public class Light {
 	private String mModel;
 	/** Firmware version. */
 	private int mFirmware;
-	/** Supported tasks. */
-	private Set<String> mTasks;
 	/** Power status. */
 	@Property("power")
 	private boolean mPower;
@@ -111,13 +109,15 @@ public class Light {
 	private int mActiveMode;
 	/** List of listeners. */
 	private Set<PropertyChangeListener> mListeners;
+	/** Available methods. */
+	private Set<Method> mAvailableMethods;
 
 	/**
 	 * Empty constructor.
 	 */
 	public Light() {
-		mTasks = new HashSet<>();
 		mListeners = new HashSet<>();
+		mAvailableMethods = new HashSet<Method>();
 		mCron = 0;
 	}
 
@@ -153,16 +153,44 @@ public class Light {
 		l.setRGB(Integer.valueOf(headers.get("RGB")));
 		l.setHue(Integer.valueOf(headers.get("HUE")));
 		l.setSaturation(Integer.valueOf(headers.get("SAT")));
-		// Add allowed tasks
+		// Add allowed methods
 		String tasks = headers.get("SUPPORT");
 		if (null != tasks) {
 			String[] taskArray = tasks.split(" ");
 			for (String task : taskArray) {
-				l.addTask(task);
+				l.addMethod(Method.mMethodMap.get(task.trim()));
 			}
 		}
 
 		return l;
+	}
+
+	/**
+	 * Add a new available method.
+	 * 
+	 * @param method method to add
+	 */
+	public void addMethod(Method method) {
+		mAvailableMethods.add(method);
+	}
+
+	/**
+	 * Get all available methods.
+	 * 
+	 * @return set of available methods
+	 */
+	public Set<Method> getAvailableMethods() {
+		return mAvailableMethods;
+	}
+
+	/**
+	 * Is the method available for this light.
+	 * 
+	 * @param method method to check
+	 * @return true if available, false else
+	 */
+	public boolean isMethodAvailable(Method method) {
+		return mAvailableMethods.contains(method);
 	}
 
 	/**
@@ -256,30 +284,12 @@ public class Light {
 	}
 
 	/**
-	 * Get allowed tasks.
+	 * Remove an available method.
 	 * 
-	 * @return allowed tasks
+	 * @param method method to remove
 	 */
-	public Set<String> getTasks() {
-		return mTasks;
-	}
-
-	/**
-	 * Add a task.
-	 * 
-	 * @param task task name
-	 */
-	public void addTask(String task) {
-		mTasks.add(task);
-	}
-
-	/**
-	 * Remove a task.
-	 * 
-	 * @param task task name to remove
-	 */
-	public void removeTask(String task) {
-		mTasks.remove(task);
+	public void removeMethod(Method method) {
+		mAvailableMethods.remove(method);
 	}
 
 	/**
