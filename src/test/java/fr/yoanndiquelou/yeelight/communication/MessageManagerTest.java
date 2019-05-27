@@ -3,6 +3,7 @@ package fr.yoanndiquelou.yeelight.communication;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -88,16 +89,19 @@ public class MessageManagerTest {
 			assertNull(m.getHistory().get(0).getV());
 			socketMock.getOutputStream().write("{\"id\":1, \"result\":[\"ok\"]}\r\n".getBytes());
 			socketMock.getOutputStream().flush();
-			java.lang.reflect.Method presponse = MessageManager.class.getDeclaredMethod("processResponse", String.class);
+			java.lang.reflect.Method presponse = MessageManager.class.getDeclaredMethod("processResponse",
+					String.class);
 			presponse.setAccessible(true);
 			presponse.invoke(m, "{\"id\":1, \"result\":[\"ok\"]}");
-			while(!result.isDone()) {}
+			while (!result.isDone()) {
+			}
 			assertTrue(result.get());
-		} catch (ParameterException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | InterruptedException | ExecutionException e) {
+		} catch (ParameterException | NoSuchMethodException | SecurityException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException | InterruptedException | ExecutionException e) {
 			fail("Should not catch exception", e);
 		}
 	}
-	
+
 	/**
 	 * Test receive response command.
 	 * 
@@ -116,30 +120,32 @@ public class MessageManagerTest {
 		when(socketMock.getOutputStream()).thenReturn(byteArrayOutputStream);
 		when(socketMock.getInputStream()).thenReturn(byteArrayInputStream);
 		l.addListener(new PropertyChangeListener() {
-			
+
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
-				if(null != evt) {
+				if (null != evt) {
 					assertEquals("power", evt.getPropertyName());
 					assertEquals(false, evt.getOldValue());
 					assertEquals(true, evt.getNewValue());
 					l.removeListener(this);
 				}
-				
+
 			}
 		});
 		try {
 			MessageManager m = new MessageManager(l, socketMock);
 
-			java.lang.reflect.Method presponse = MessageManager.class.getDeclaredMethod("processResponse", String.class);
+			java.lang.reflect.Method presponse = MessageManager.class.getDeclaredMethod("processResponse",
+					String.class);
 			presponse.setAccessible(true);
 			presponse.invoke(m, "{\"method\":\"props\",\"params\":{\"power\":\"on\"}}");
 			assertTrue(l.isPower());
-		} catch (ParameterException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		} catch (ParameterException | NoSuchMethodException | SecurityException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
 			fail("Should not catch exception", e);
 		}
 	}
-	
+
 	/**
 	 * Test receive response command.
 	 * 
@@ -160,14 +166,40 @@ public class MessageManagerTest {
 		try {
 			MessageManager m = new MessageManager(l, socketMock);
 
-			java.lang.reflect.Method presponse = MessageManager.class.getDeclaredMethod("processResponse", String.class);
+			java.lang.reflect.Method presponse = MessageManager.class.getDeclaredMethod("processResponse",
+					String.class);
 			presponse.setAccessible(true);
 			presponse.invoke(m, "{\"method\":\"props\",\"params\":{\"power\":\"no\"}}");
 			assertFalse(l.isPower());
 
-		} catch (ParameterException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		} catch (ParameterException | NoSuchMethodException | SecurityException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
 			fail("Should not catch exception", e);
 		}
 	}
 
+	@Test
+	@DisplayName("testBadParameter exception")
+	public void testParameterException() throws IOException {
+		Light l = new Light();
+		l.setIp("127.0.0.1");
+		Socket socketMock = mock(Socket.class);
+		socketMock.setSoTimeout(10000);
+		byte[] buf = new byte[1024];
+		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buf);
+		when(socketMock.getOutputStream()).thenReturn(byteArrayOutputStream);
+		when(socketMock.getInputStream()).thenReturn(byteArrayInputStream);
+		try {
+			MessageManager m = new MessageManager(l, socketMock);
+
+			Future<Boolean> res = m.send(Method.SET_POWER, new Object[] { true });
+			assertFalse(res == null);
+			assertTrue(res.isDone());
+			assertFalse(res.get());
+		} catch (ExecutionException | InterruptedException |ParameterException | SecurityException | IllegalArgumentException e) {
+			fail("Should not catch exception", e);
+		}
+	}
+	
 }

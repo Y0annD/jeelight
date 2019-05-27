@@ -26,10 +26,17 @@ import fr.yoanndiquelou.jeelight.model.Duo;
 import fr.yoanndiquelou.jeelight.model.Light;
 import fr.yoanndiquelou.jeelight.model.Method;
 import fr.yoanndiquelou.jeelight.model.Trio;
+import fr.yoanndiquelou.jeelight.utils.FailFuture;
 
 public class MessageManager {
 	/** Message manager logger. */
 	private static final Logger logger = LogManager.getLogger(MessageManager.class);
+	/** response ID. */
+	private static final String ID = "id";
+	/** Method. */
+	private static final String METHOD = "method";
+	/** Properties update. */
+	private static final String PROPS = "props";
 	/** Command response parser. */
 	private static final Pattern commandResponsePattern = Pattern.compile("\\{\"id\":(\\d*), \"result\":(.*)\\}");
 	/** Notification response parser. */
@@ -46,7 +53,7 @@ public class MessageManager {
 	/** Light instance. */
 	private final Light mLight;
 	/** Id of message. */
-	private int id = 1;
+	private int mId = 1;
 	/** Connected to device. */
 	private boolean mConnected;
 	/**
@@ -93,7 +100,6 @@ public class MessageManager {
 		mSocket = socket;
 		mConnected = true;
 		try {
-//			mSocket .getInputStream().REA
 			mReader = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
 			mReceiveThread = new Thread(() -> {
 				while (mConnected) {
@@ -141,9 +147,9 @@ public class MessageManager {
 	private void processResponse(final String data) {
 		if (null != data) {
 			String localData = data.substring(2);
-			if (localData.startsWith("id")) {
+			if (localData.startsWith(ID)) {
 				processCommandResponse(data);
-			} else if (localData.startsWith("method")) {
+			} else if (localData.startsWith(METHOD)) {
 				processNotification(data);
 			} else {
 				logger.error("Unknown notification", data);
@@ -184,7 +190,7 @@ public class MessageManager {
 			// Remove { and } chars at begin and end
 			params = params.substring(1, params.length() - 1);
 			logger.debug("Method: {}, params: {}", method, params);
-			if ("props".equals(method)) {
+			if (PROPS.equals(method)) {
 				processPropertyNotification(params);
 			} else {
 				logger.error("Unknown notification", notification);
@@ -229,10 +235,10 @@ public class MessageManager {
 	public Future<Boolean> send(Method method, Object... params) {
 		try {
 
-			Command cmd = new Command(id++, method, params);
+			Command cmd = new Command(mId++, method, params);
 
 			Duo<Command, Boolean> duo = new Duo<>(cmd, null);
-			mHistory.put(id - 1, duo);
+			mHistory.put(mId - 1, duo);
 
 			logger.debug("Ip: " + mLight.getIp());
 			logger.debug("Data: " + cmd.toString());
@@ -242,10 +248,10 @@ public class MessageManager {
 
 		} catch (ParameterException e1) {
 			logger.error("Wrong parameter", e1);
-			return null;
+			return new FailFuture();
 		} catch (IOException e) {
 			logger.error("Error while sending command", e);
-			return null;
+			return new FailFuture();
 		}
 	}
 
@@ -255,7 +261,7 @@ public class MessageManager {
 	 * @return command history
 	 */
 	public List<Trio<Integer, Command, Boolean>> getHistory() {
-		List<Trio<Integer, Command, Boolean>> history = new ArrayList<Trio<Integer, Command, Boolean>>();
+		List<Trio<Integer, Command, Boolean>> history = new ArrayList<>();
 		for (Entry<Integer, Duo<Command, Boolean>> entry : mHistory.entrySet()) {
 			history.add(new Trio<>(entry.getKey(), entry.getValue().getK(), entry.getValue().getV()));
 		}
