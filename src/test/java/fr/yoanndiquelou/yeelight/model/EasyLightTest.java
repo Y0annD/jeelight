@@ -303,14 +303,14 @@ public class EasyLightTest {
 		MessageManager mockManager = mock(MessageManager.class);
 		EasyLight el = new EasyLight(mLight, mockManager);
 		
-		when(mockManager.send(Method.SET_POWER, "On", EffectType.SMOOTH.getValue(), 100)).thenReturn(mFut);
+		when(mockManager.send(Method.SET_POWER, "on", EffectType.SMOOTH.getValue(), 100)).thenReturn(mFut);
 		try{
 			el.setPower(true);
 		} catch(CommandException e) {
 			fail("Should not throw exception");
 		}
 
-		verify(mockManager).send(Method.SET_POWER, "On", EffectType.SMOOTH.getValue(), 100);
+		verify(mockManager).send(Method.SET_POWER, "on", EffectType.SMOOTH.getValue(), 100);
 	}
 	
 	@DisplayName("Test set name")
@@ -596,14 +596,14 @@ public class EasyLightTest {
 		MessageManager mockManager = mock(MessageManager.class);
 		EasyLight el = new EasyLight(mLight, mockManager);
 		
-		when(mockManager.send(Method.BG_SET_POWER, "Off", EffectType.SMOOTH.getValue(), 100)).thenReturn(mFut);
+		when(mockManager.send(Method.BG_SET_POWER, "off", EffectType.SMOOTH.getValue(), 100)).thenReturn(mFut);
 		try{
 			el.setBgPower(false);
 		} catch(CommandException e) {
 			fail("Should not throw exception");
 		}
 
-		verify(mockManager).send(Method.BG_SET_POWER, "Off", EffectType.SMOOTH.getValue(), 100);
+		verify(mockManager).send(Method.BG_SET_POWER, "off", EffectType.SMOOTH.getValue(), 100);
 	}
 	
 	@DisplayName("Test set adjust")

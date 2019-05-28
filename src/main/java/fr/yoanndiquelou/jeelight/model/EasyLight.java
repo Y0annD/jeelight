@@ -484,7 +484,7 @@ public class EasyLight {
 	 * @return power status as string
 	 */
 	private String getPowerStr(boolean power) {
-		return (power ? "On" : "Off");
+		return (power ? "on" : "off");
 	}
 
 	/**
@@ -552,5 +552,14 @@ public class EasyLight {
 		} else {
 			throw new CommandException(String.format("%s is not an available method for this light", method.getName()));
 		}
+	}
+
+	/**
+	 * Return the associated light.
+	 * 
+	 * @return associated light
+	 */
+	public Light getLight() {
+		return mLight;
 	}
 }
