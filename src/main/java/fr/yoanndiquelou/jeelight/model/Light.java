@@ -19,7 +19,7 @@ import fr.yoanndiquelou.jeelight.utils.AttributeParser;
 /**
  * Class that describe Light.
  * 
- * @author yoann Diquélou
+ * @author Y0annD
  *
  */
 public class Light {
@@ -93,7 +93,14 @@ public class Light {
 	/** Background flow params. */
 	@Property("bg_flow_params")
 	private String mBgFlowParams = "";
-	/** Music On. */
+	/**
+	 * Music On.
+	 * 
+	 * <p>
+	 * When the music mode is enabled, the device will not send notifications or
+	 * respond to your commands
+	 * </p>
+	 */
 	@Property("music_on")
 	private int mMusic;
 	/** Brightness of night mode. */
@@ -227,7 +234,7 @@ public class Light {
 	/**
 	 * Set Id.
 	 * 
-	 * @param id id
+	 * @param id light id
 	 */
 	public void setId(long id) {
 		mId = id;

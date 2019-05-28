@@ -8,6 +8,12 @@ import fr.yoanndiquelou.jeelight.communication.MessageManager;
 import fr.yoanndiquelou.jeelight.exception.CommandException;
 import fr.yoanndiquelou.jeelight.exception.ParameterException;
 
+/**
+ * Light with actions managed in an easy way.
+ * 
+ * @author Y0annD
+ *
+ */
 public class EasyLight {
 	/** associated light. */
 	private Light mLight;
@@ -211,7 +217,7 @@ public class EasyLight {
 			throw new IllegalArgumentException("Duration must be higher than 29ms");
 		}
 		executeCommand(Method.BG_ADJUST_CT, percentage, duration);
-		return mLight.getBrightness();
+		return mLight.getRGB();
 	}
 
 	/**
@@ -230,7 +236,7 @@ public class EasyLight {
 			throw new IllegalArgumentException("Duration must be higher than 29ms");
 		}
 		executeCommand(Method.BG_ADJUST_COLOR, percentage, duration);
-		return mLight.getBrightness();
+		return mLight.getRGB();
 	}
 
 	/**
@@ -255,6 +261,15 @@ public class EasyLight {
 		return mLight.getCt();
 	}
 
+	/**
+	 * Set rgb color.
+	 * 
+	 * @param red   red value
+	 * @param green green value
+	 * @param blue  blue value
+	 * @return new color as following [red, green, blue]
+	 * @throws CommandException something goes wrong
+	 */
 	public int[] setRgb(int red, int green, int blue) throws CommandException {
 		int newColor = setRgb(red * 65536 + green * 256 + blue);
 		return new int[] { newColor >> 4, newColor >> 2 & 0xFF, newColor & 0xFF };
@@ -272,6 +287,13 @@ public class EasyLight {
 		return mLight.getRGB();
 	}
 
+	/**
+	 * Set hue and saturation.
+	 * 
+	 * @param hue hue value
+	 * @param sat saturation value
+	 * @throws CommandException something goes wrong
+	 */
 	public void setHsv(int hue, int sat) throws CommandException {
 		if (hue < 0 || hue > 359) {
 			throw new IllegalArgumentException("Hue must be positive and lower than 360");
@@ -283,10 +305,11 @@ public class EasyLight {
 	}
 
 	/**
+	 * Set brightness.
 	 * 
-	 * @param bright
-	 * @return
-	 * @throws CommandException 
+	 * @param bright brighness value
+	 * @return new brightness
+	 * @throws CommandException something goes wrong
 	 */
 	public int setBright(int bright) throws CommandException {
 		if (bright < 0 || bright > 100) {
@@ -331,6 +354,7 @@ public class EasyLight {
 
 	/**
 	 * Delete cron task.
+	 * 
 	 * @throws CommandException unavailable method
 	 */
 	public void delCron() throws CommandException {
@@ -370,11 +394,11 @@ public class EasyLight {
 	 */
 	public boolean bgToggle() throws CommandException {
 		executeCommand(Method.BG_TOGGLE);
-		return mLight.isPower();
+		return mLight.isBgPower();
 	}
 
 	/**
-	 * Define color temperature.
+	 * Define background color temperature.
 	 * 
 	 * @param temperature color temperature Should be:
 	 *                    <ul>
@@ -392,19 +416,42 @@ public class EasyLight {
 		}
 
 		executeCommand(Method.BG_SET_CT_ABX, temperature, mEffect.getValue(), mDuration);
-		return mLight.getCt();
+		return mLight.getBgCt();
 	}
 
+	/**
+	 * Set background rgb value.
+	 * 
+	 * @param red   red value
+	 * @param green green value
+	 * @param blue  blue value
+	 * @return new value as following [red, green, blue]
+	 * @throws CommandException something goes wrong
+	 */
 	public int[] setBgRgb(int red, int green, int blue) throws CommandException {
 		int newColor = setBgRgb(red * 65536 + green * 256 + blue);
 		return new int[] { newColor >> 4, newColor >> 2 & 0xFF, newColor & 0xFF };
 	}
 
+	/**
+	 * Set background rgb value.
+	 * 
+	 * @param mergedValue merged background rgb value
+	 * @return new background rgb value
+	 * @throws CommandException something goes wrong
+	 */
 	public int setBgRgb(int mergedValue) throws CommandException {
 		executeCommand(Method.BG_SET_RGB, mergedValue, mEffect.getValue(), mDuration);
-		return mLight.getRGB();
+		return mLight.getBgRGB();
 	}
 
+	/**
+	 * Set hue and saturation for background.
+	 * 
+	 * @param hue background hue
+	 * @param sat background saturation
+	 * @throws CommandException something goes wrong
+	 */
 	public void setBgHsv(int hue, int sat) throws CommandException {
 		if (hue < 0 || hue > 359) {
 			throw new IllegalArgumentException("Hue must be positive and lower than 360");
@@ -416,26 +463,40 @@ public class EasyLight {
 	}
 
 	/**
+	 * Set background brigness.
 	 * 
-	 * @param bright
-	 * @return
-	 * @throws CommandException unavailable method
+	 * @param bright brightness
+	 * @return background brightness
+	 * @throws CommandException something goes wrong
 	 */
-	public int setBgBright(int bright) throws CommandException{
+	public int setBgBright(int bright) throws CommandException {
 		if (bright < 0 || bright > 100) {
 			throw new IllegalArgumentException("Bright must be positive and lower than 100");
 		}
 		executeCommand(Method.BG_SET_BRIGHT, bright, mEffect.getValue(), mDuration);
-		return mLight.getBrightness();
+		return mLight.getBgBrightness();
 	}
 
+	/**
+	 * Convert power boolean to power string.
+	 * 
+	 * @param power power status
+	 * @return power status as string
+	 */
 	private String getPowerStr(boolean power) {
 		return (power ? "On" : "Off");
 	}
 
+	/**
+	 * Set the background power status.
+	 * 
+	 * @param power power status
+	 * @return background power status
+	 * @throws CommandException something goes wrong
+	 */
 	public boolean setBgPower(boolean power) throws CommandException {
 		executeCommand(Method.BG_SET_POWER, getPowerStr(power), mEffect.getValue(), mDuration);
-		return mLight.isPower();
+		return mLight.isBgPower();
 	}
 
 	/**
@@ -473,6 +534,13 @@ public class EasyLight {
 		return mLight.getName();
 	}
 
+	/**
+	 * Execute a command.
+	 * 
+	 * @param method method to execute
+	 * @param params parameters
+	 * @throws CommandException something goes wrong in the command
+	 */
 	private void executeCommand(Method method, Object... params) throws CommandException {
 		if (mLight.isMethodAvailable(method)) {
 			Future<Boolean> result = mMessaging.send(method, params);

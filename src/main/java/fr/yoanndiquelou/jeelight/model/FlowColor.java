@@ -1,5 +1,11 @@
 package fr.yoanndiquelou.jeelight.model;
 
+/**
+ * State of flow.
+ * 
+ * @author Y0annD
+ *
+ */
 public class FlowColor {
 	/** Flow color duration. */
 	private int mDuration;
@@ -10,6 +16,14 @@ public class FlowColor {
 	/** Brightness value. */
 	private int mBrightness;
 
+	/**
+	 * Instance of flow state.
+	 * 
+	 * @param mode       color mode
+	 * @param color      color to set
+	 * @param brightness brightness to set
+	 * @param duration   duration of the state
+	 */
 	public FlowColor(ColorMode mode, int color, int brightness, int duration) {
 		mMode = mode;
 		mColor = color;

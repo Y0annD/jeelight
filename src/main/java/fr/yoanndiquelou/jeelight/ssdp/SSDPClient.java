@@ -49,10 +49,42 @@ public class SSDPClient {
 	/** Listeners to devices change. */
 	private List<PropertyChangeListener> mListeners;
 
+	/**
+	 * Simple SSDP client, that only manage discovery.
+	 * 
+	 * @param timeout     discoverty timeout
+	 * @param serviceType type of service
+	 *                    <p>
+	 *                    <b>wifi_bulb</b> for yeelight
+	 *                    </p>
+	 * @param port        port to listen
+	 *                    <p>
+	 *                    <b>1982</b> for yeelight
+	 *                    </p>
+	 * @throws SocketException exception
+	 */
 	public SSDPClient(int timeout, String serviceType, int port) throws SocketException {
 		this(timeout, serviceType, port, new DatagramSocket());
 	}
 
+	/**
+	 * Simple SSDP client, that only manage discovery.
+	 * <p>
+	 * Mainly for testing purposes
+	 * </p>
+	 * 
+	 * @param timeout      discoverty timeout
+	 * @param serviceType  type of service
+	 *                     <p>
+	 *                     <b>wifi_bulb</b> for yeelight
+	 *                     </p>
+	 * @param port         port to listen
+	 *                     <p>
+	 *                     <b>1982</b> for yeelight
+	 *                     </p>
+	 * @param clientSocket socket
+	 * @throws SocketException exception
+	 */
 	public SSDPClient(int timeout, String serviceType, int port, DatagramSocket clientSocket) {
 		mTimeout = timeout;
 		mServiceType = serviceType;
@@ -111,16 +143,16 @@ public class SSDPClient {
 	/**
 	 * Get devices.
 	 * 
-	 * @return devices
+	 * @return known devices
 	 */
 	public List<Light> getDevices() {
 		return new ArrayList<>(mDevices.values());
 	}
 
 	/**
-	 * Is discovering enable.
+	 * Is discovery enabled.
 	 * 
-	 * @return true if discovering is enabled
+	 * @return true if discovery is enabled
 	 */
 	public boolean isDiscovering() {
 		return mIsDiscovering;
@@ -128,6 +160,9 @@ public class SSDPClient {
 
 	/**
 	 * Add a device Listener.
+	 * <p>
+	 * Be notified when a new device appears
+	 * </p>
 	 * 
 	 * @param listener device listener
 	 */
@@ -148,6 +183,9 @@ public class SSDPClient {
 
 	/**
 	 * Add a device.
+	 * <p>
+	 * Notify every listeners that a new device appears.
+	 * </p>
 	 * 
 	 * @param device new device
 	 */

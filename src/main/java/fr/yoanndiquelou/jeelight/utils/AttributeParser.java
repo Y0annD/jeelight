@@ -1,5 +1,11 @@
 package fr.yoanndiquelou.jeelight.utils;
 
+/**
+ * Convert a string attribute to the appropriate object.
+ * 
+ * @author Y0annD
+ *
+ */
 public class AttributeParser {
 
 	/**
@@ -24,10 +30,10 @@ public class AttributeParser {
 		} else {
 			try {
 				result = Integer.valueOf(param);
-			} catch(NumberFormatException e) {
+			} catch (NumberFormatException e) {
 				try {
 					result = Long.valueOf(param);
-				} catch(NumberFormatException e1) {
+				} catch (NumberFormatException e1) {
 					result = param;
 				}
 			}
