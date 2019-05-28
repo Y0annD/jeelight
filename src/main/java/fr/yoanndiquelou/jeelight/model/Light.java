@@ -142,7 +142,11 @@ public class Light {
 		}
 		l.setIp(address.getHostAddress());
 		l.setLocation(headers.get("LOCATION"));
-		l.setName(address.getHostName());
+		if (headers.containsKey("NAME")) {
+			l.setName(headers.get("NAME"));
+		} else {
+			l.setName(address.getHostName());
+		}
 		l.setId(new BigInteger(headers.get("ID").substring(2), 16).longValue());
 		l.setModel(headers.get("MODEL"));
 		l.setFirmware(Integer.valueOf(headers.get("FW_VER")));

@@ -77,6 +77,7 @@ public class SSDPClient {
 					try {
 						DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 						clientSocket.receive(receivePacket);
+						logger.debug(new String(receivePacket.getData()));
 						addDevice(Light.fromDatagramPacket(receivePacket.getAddress(), receivePacket.getData()));
 
 					} catch (SocketTimeoutException e) {
