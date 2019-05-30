@@ -42,7 +42,7 @@ public class SwitchDemo {
 					MessageManager manager = null;
 					logger.info("New device");
 					try {
-						manager = new MessageManager(l);
+						manager = MessageManager.getInstance(l);
 					} catch (ParameterException | IOException e) {
 						logger.error("Network exception", e);
 						System.exit(1);

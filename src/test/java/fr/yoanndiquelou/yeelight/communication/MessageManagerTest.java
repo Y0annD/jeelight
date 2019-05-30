@@ -54,7 +54,7 @@ public class MessageManagerTest {
 		when(socketMock.getOutputStream()).thenReturn(byteArrayOutputStream);
 		when(socketMock.getInputStream()).thenReturn(byteArrayInputStream);
 		try {
-			MessageManager m = new MessageManager(l, socketMock);
+			MessageManager m = MessageManager.getInstance(l, socketMock);
 
 			m.send(Method.TOGGLE, new Object[0]);
 			assertEquals(1, m.getHistory().size());
@@ -82,7 +82,7 @@ public class MessageManagerTest {
 		when(socketMock.getOutputStream()).thenReturn(byteArrayOutputStream);
 		when(socketMock.getInputStream()).thenReturn(byteArrayInputStream);
 		try {
-			MessageManager m = new MessageManager(l, socketMock);
+			MessageManager m = MessageManager.getInstance(l, socketMock);
 
 			Future<Boolean> result = m.send(Method.TOGGLE, new Object[0]);
 			assertEquals(1, m.getHistory().size());
@@ -133,7 +133,7 @@ public class MessageManagerTest {
 			}
 		});
 		try {
-			MessageManager m = new MessageManager(l, socketMock);
+			MessageManager m = MessageManager.getInstance(l, socketMock);
 
 			java.lang.reflect.Method presponse = MessageManager.class.getDeclaredMethod("processResponse",
 					String.class);
@@ -164,7 +164,7 @@ public class MessageManagerTest {
 		when(socketMock.getOutputStream()).thenReturn(byteArrayOutputStream);
 		when(socketMock.getInputStream()).thenReturn(byteArrayInputStream);
 		try {
-			MessageManager m = new MessageManager(l, socketMock);
+			MessageManager m = MessageManager.getInstance(l, socketMock);
 
 			java.lang.reflect.Method presponse = MessageManager.class.getDeclaredMethod("processResponse",
 					String.class);
@@ -191,7 +191,7 @@ public class MessageManagerTest {
 		when(socketMock.getOutputStream()).thenReturn(byteArrayOutputStream);
 		when(socketMock.getInputStream()).thenReturn(byteArrayInputStream);
 		try {
-			MessageManager m = new MessageManager(l, socketMock);
+			MessageManager m = MessageManager.getInstance(l, socketMock);
 
 			Future<Boolean> res = m.send(Method.SET_POWER, new Object[] { true });
 			assertFalse(res == null);

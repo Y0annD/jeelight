@@ -34,7 +34,7 @@ public class EasyLight {
 	 */
 	public EasyLight(Light light) throws IOException, ParameterException {
 		mLight = light;
-		mMessaging = new MessageManager(light);
+		mMessaging = MessageManager.getInstance(light);
 	}
 
 	/**

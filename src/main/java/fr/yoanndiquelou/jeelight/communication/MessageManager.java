@@ -73,6 +73,8 @@ public class MessageManager {
 	 */
 	private Map<Integer, Duo<Command, Boolean>> mHistory = new HashMap<>();
 
+	private static Map<Light, MessageManager> mManagers = new HashMap<>();
+
 	/**
 	 * Message manager constructor.
 	 * 
@@ -80,7 +82,7 @@ public class MessageManager {
 	 * @throws IOException        input/output exception
 	 * @throws ParameterException parameter exception
 	 */
-	public MessageManager(Light light) throws IOException, ParameterException {
+	private MessageManager(Light light) throws IOException, ParameterException {
 		this(light, new Socket(light.getIp(), 55443));
 	}
 
@@ -94,7 +96,7 @@ public class MessageManager {
 	 * @param socket socket mocket
 	 * @throws ParameterException parameter exception
 	 */
-	public MessageManager(Light light, Socket socket) throws ParameterException {
+	private MessageManager(Light light, Socket socket) throws ParameterException {
 		mListeners = new ArrayList<>();
 		mLight = light;
 		mSocket = socket;
@@ -116,6 +118,45 @@ public class MessageManager {
 			mReceiveThread.start();
 		} catch (IOException e) {
 			throw new ParameterException("Error with socket during instanciation", e);
+		}
+	}
+
+	/**
+	 * Get instance of Message manager for the specified light.
+	 * 
+	 * @param light light to manage
+	 * @return associated message manager
+	 * @throws IOException        Input/Output exception
+	 * @throws ParameterException parameter exception
+	 */
+	public static MessageManager getInstance(Light light) throws IOException, ParameterException {
+		if (mManagers.containsKey(light)) {
+			return mManagers.get(light);
+		} else {
+			MessageManager manager = new MessageManager(light);
+			mManagers.put(light, manager);
+			return manager;
+
+		}
+	}
+
+	/**
+	 * Get instance of Message manager for the specified light.
+	 * 
+	 * @param light  light to manage
+	 * @param socket socket to add to light if new message manager is created
+	 * @return associated message manager
+	 * @throws IOException        Input/Output exception
+	 * @throws ParameterException parameter exception
+	 */
+	public static MessageManager getInstance(Light light, Socket socket) throws IOException, ParameterException {
+		if (mManagers.containsKey(light)) {
+			return mManagers.get(light);
+		} else {
+			MessageManager manager = new MessageManager(light, socket);
+			mManagers.put(light, manager);
+			return manager;
+
 		}
 	}
 
@@ -189,7 +230,7 @@ public class MessageManager {
 			String params = matcher.group(2).trim();
 			// Remove { and } chars at begin and end
 			params = params.substring(1, params.length() - 1);
-			logger.debug("Method: {}, params: {}", method, params);
+			logger.debug("Instance {}, Method: {}, params: {}", this, method, params);
 			if (PROPS.equals(method)) {
 				processPropertyNotification(params);
 			} else {

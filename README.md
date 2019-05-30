@@ -52,7 +52,7 @@ Then you interact in this way:
 
 ```java
 Light light = ...
-MessageManager manager = new MessageManager(l);
+MessageManager manager = MessageManager.getInstance(l);
 Future<Boolean> future = manager.send(Method.method, param1, param2,...);
 while(!future.isDone()){// Wait}
 // Command was executed, can get the result
@@ -112,7 +112,7 @@ Don't forger to remove the listener.
 
 # TODO
 
-Actually I need to manage `music` methods.
+Actually I need to manage `music` and `scenes` methods.
 
 
 # Conclusion
