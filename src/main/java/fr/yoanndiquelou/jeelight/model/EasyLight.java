@@ -319,15 +319,142 @@ public class EasyLight {
 		return mLight.getBrightness();
 	}
 
+	/**
+	 * Set light power.
+	 * 
+	 * @param power true to switch on, false to switch off
+	 * @return new power value
+	 * @throws CommandException command could not be executed
+	 */
 	public boolean setPower(boolean power) throws CommandException {
 		executeCommand(Method.SET_POWER, getPowerStr(power), mEffect.getValue(), mDuration);
 		return mLight.isPower();
 	}
 
-	// TODO: Scene management
-//	public void setScene() {
-//		
-//	}
+	/**
+	 * Set scene with 2 arguments.
+	 * 
+	 * @param scClass    scene class
+	 * @param val1
+	 *                   <ul>
+	 *                   <li>Color for COLOR class</li>
+	 *                   <li>Color temperature for CT class</li>
+	 *                   </ul>
+	 * @param brightness brightness
+	 * @throws CommandException command could not be executed
+	 */
+	public void setScene(SceneClass scClass, int val1, int brightness) throws CommandException {
+		setScene(Method.SET_SCENE, scClass, val1, brightness);
+	}
+
+	/**
+	 * Set scene with 2 arguments.
+	 * 
+	 * @param scClass    scene class
+	 * @param val1
+	 *                   <ul>
+	 *                   <li>Color for COLOR class</li>
+	 *                   <li>Color temperature for CT class</li>
+	 *                   </ul>
+	 * @param brightness brightness
+	 * @throws CommandException command could not be executed
+	 */
+	public void setBgScene(SceneClass scClass, int val1, int brightness) throws CommandException {
+		setScene(Method.BG_SET_SCENE, scClass, val1, brightness);
+	}
+
+	/**
+	 * Set scene with 2 arguments.
+	 * 
+	 * @param method     Method.SET_SCENE or Method.BG_SET_SCENE
+	 * @param scClass    scene class
+	 * @param val1
+	 *                   <ul>
+	 *                   <li>Color for COLOR class</li>
+	 *                   <li>Color temperature for CT class</li>
+	 *                   </ul>
+	 * @param brightness brightness
+	 * @throws CommandException command could not be executed
+	 */
+	private void setScene(Method method, SceneClass scClass, int val1, int brightness) throws CommandException {
+		if (scClass.equals(SceneClass.COLOR)) {
+			if (val1 < 0 || val1 > 0xFFFFFF) {
+				throw new CommandException("Color must be between 0 and 0xffffff");
+			}
+		} else if (scClass.equals(SceneClass.CT)) {
+			if (val1 < 1500 || val1 > 5900) {
+				throw new CommandException("Color temperature must be between 1500 and 5900");
+			}
+		} else if (scClass.equals(SceneClass.AUTO_DELAY_OFF)) {
+			if (val1 < 1) {
+				throw new CommandException("Timer must be at least 1");
+			}
+		} else {
+			throw new CommandException(scClass.toString() + " could not be executed with this constructor");
+		}
+		if (brightness > 100 || brightness < 0) {
+			throw new CommandException("Brightness must be between 0 and 100");
+		}
+		if (scClass.equals(SceneClass.AUTO_DELAY_OFF)) {
+			executeCommand(Method.SET_SCENE, scClass.getValue(), brightness, val1);
+
+		} else {
+			executeCommand(method, scClass.getValue(), val1, brightness);
+		}
+	}
+
+	public void setScene(SceneClass scClass, int val1, int val2, Object val3) throws CommandException {
+		setScene(Method.SET_SCENE, scClass, val1, val2, val3);
+	}
+
+	public void setBgScene(SceneClass scClass, int val1, int val2, Object val3) throws CommandException {
+		setScene(Method.BG_SET_SCENE, scClass, val1, val2, val3);
+	}
+
+	/**
+	 * Set scene with 3 arguments.
+	 * 
+	 * @param scClass class, might be color flow
+	 * @param val1
+	 *                <ul>
+	 *                <li>Hue for HSV class</li>
+	 *                <li>for CF class</li>
+	 *                </ul>
+	 * @param val2
+	 *                <ul>
+	 *                <li>Saturation for HSV class</li>
+	 *                <li>for CF class</li>
+	 *                </ul>
+	 * @param val3
+	 *                <ul>
+	 *                <li>brightness for HSV class</li>
+	 *                <li>Flow for CF class</li>
+	 *                </ul>
+	 * @throws CommandException
+	 */
+	public void setScene(Method method, SceneClass scClass, int val1, int val2, Object val3) throws CommandException {
+		if (scClass.equals(SceneClass.HSV)) {
+			if (val1 < 0 || val1 > 359) {
+				throw new CommandException("Hue must be between 0 and 359");
+			}
+			if (val2 < 0 || val2 > 100) {
+				throw new CommandException("Saturation must be between 0 and 100");
+			}
+			if (!(val3 instanceof Integer) || (int) val3 < 0 || (int) val3 > 100) {
+				throw new CommandException("Saturation must be between 0 and 100");
+			}
+		} else if (scClass.equals(SceneClass.CF)) {
+			if (val1 < 0) {
+				throw new CommandException("Count must be 0 or more");
+			}
+			if (val2 < 0 || val2 > 2) {
+				throw new CommandException("Action must be 0, 1 or 2");
+			}
+		} else {
+			throw new CommandException(scClass.toString() + " could not be executed with this constructor");
+		}
+		executeCommand(method, val1, val2, val3);
+	}
 
 	/**
 	 * Set time before switch off.

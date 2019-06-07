@@ -28,6 +28,7 @@ import fr.yoanndiquelou.jeelight.model.EffectType;
 import fr.yoanndiquelou.jeelight.model.FlowColor;
 import fr.yoanndiquelou.jeelight.model.Light;
 import fr.yoanndiquelou.jeelight.model.Method;
+import fr.yoanndiquelou.jeelight.model.SceneClass;
 
 @DisplayName("Test the easylight object")
 public class EasyLightTest {
@@ -206,6 +207,167 @@ public class EasyLightTest {
 		verify(mockManager).send(Method.CRON_DEL,0);
 	}
 	
+	@DisplayName("Test set scene")
+	@Test
+	public void testSetScene() {
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(mLight, mockManager);
+		when(mockManager.send(Method.SET_SCENE, SceneClass.AUTO_DELAY_OFF.getValue(), 50, 5)).thenReturn(mFut);
+		when(mockManager.send(Method.SET_SCENE, SceneClass.COLOR.getValue(), 65280, 70)).thenReturn(mFut);
+		when(mockManager.send(Method.SET_SCENE, SceneClass.CT.getValue(), 5400, 100)).thenReturn(mFut);
+		when(mockManager.send(Method.SET_SCENE, SceneClass.HSV.getValue(), 300,70, 100)).thenReturn(mFut);
+		when(mockManager.send(Method.SET_SCENE, SceneClass.CF.getValue(), 0,0, "500,1,255,100,1000,1,16776960,70")).thenReturn(mFut);
+		
+		try {
+			el.setScene(SceneClass.AUTO_DELAY_OFF, 50, 5);
+			el.setScene(SceneClass.COLOR, 65280, 70);
+			el.setScene(SceneClass.CT, 5400, 100);
+			el.setScene(SceneClass.HSV, 300, 70, 100);
+			el.setScene(SceneClass.CF, 0, 0, "500,1,255,100,1000,1,16776960,70");
+		} catch(CommandException e) {
+			fail("Should not throw exception");
+		}
+		
+		// test parameters
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.COLOR, -1, 1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.COLOR, 0xffffff1, 1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.COLOR, 10, -1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.COLOR, 10, 101);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.CT, 1499, 1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.CT, 5901, 1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.AUTO_DELAY_OFF, 0, 1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.HSV, 0, 1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.HSV, -1, 1,1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.HSV, 360, 1,1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.HSV, 1, -1,1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.HSV, 1, 101,1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.HSV, 0, 1,"abc");
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.HSV, 0, 1,-1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.HSV, 0, 1,101);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.CF, -1, 1, "");
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.CF, 0, -1, "");
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.CF, 0, 3, "");
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setScene(SceneClass.COLOR, 10, 101, 0);
+		});
+	}
+	
+	@DisplayName("Test set scene")
+	@Test
+	public void testSetBgScene() {
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(mLight, mockManager);
+		when(mockManager.send(Method.BG_SET_SCENE, SceneClass.AUTO_DELAY_OFF.getValue(), 50, 5)).thenReturn(mFut);
+		when(mockManager.send(Method.BG_SET_SCENE, SceneClass.COLOR.getValue(), 65280, 70)).thenReturn(mFut);
+		when(mockManager.send(Method.BG_SET_SCENE, SceneClass.CT.getValue(), 5400, 100)).thenReturn(mFut);
+		when(mockManager.send(Method.BG_SET_SCENE, SceneClass.HSV.getValue(), 300,70, 100)).thenReturn(mFut);
+		when(mockManager.send(Method.BG_SET_SCENE, SceneClass.CF.getValue(), 0,0, "500,1,255,100,1000,1,16776960,70")).thenReturn(mFut);
+		
+		try {
+			el.setBgScene(SceneClass.AUTO_DELAY_OFF, 50, 5);
+			el.setBgScene(SceneClass.COLOR, 65280, 70);
+			el.setBgScene(SceneClass.CT, 5400, 100);
+			el.setBgScene(SceneClass.HSV, 300, 70, 100);
+			el.setBgScene(SceneClass.CF, 0, 0, "500,1,255,100,1000,1,16776960,70");
+		} catch(CommandException e) {
+			fail("Should not throw exception");
+		}
+		
+		// test parameters
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.COLOR, -1, 1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.COLOR, 0xffffff1, 1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.COLOR, 10, -1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.COLOR, 10, 101);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.CT, 1499, 1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.CT, 5901, 1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.AUTO_DELAY_OFF, 0, 1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.HSV, 0, 1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.HSV, -1, 1,1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.HSV, 360, 1,1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.HSV, 1, -1,1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.HSV, 1, 101,1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.HSV, 0, 1,"abc");
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.HSV, 0, 1,-1);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.HSV, 0, 1,101);
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.CF, -1, 1, "");
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.CF, 0, -1, "");
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.CF, 0, 3, "");
+		});
+		assertThrows(CommandException.class, ()->{
+			el.setBgScene(SceneClass.COLOR, 10, 101, 0);
+		});
+	}
 	
 	
 	@DisplayName("Test set color temperature")

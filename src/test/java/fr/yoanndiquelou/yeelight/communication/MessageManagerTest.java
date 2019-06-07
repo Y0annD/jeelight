@@ -3,7 +3,6 @@ package fr.yoanndiquelou.yeelight.communication;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -197,9 +196,30 @@ public class MessageManagerTest {
 			assertFalse(res == null);
 			assertTrue(res.isDone());
 			assertFalse(res.get());
-		} catch (ExecutionException | InterruptedException |ParameterException | SecurityException | IllegalArgumentException e) {
+		} catch (ExecutionException | InterruptedException | ParameterException | SecurityException
+				| IllegalArgumentException e) {
 			fail("Should not catch exception", e);
 		}
 	}
-	
+
+	@Test
+	@DisplayName("testGetInstances methods")
+	public void testGetInstancesMethods() throws IOException {
+		Light l = new Light();
+		l.setIp("127.0.0.1");
+		try {
+			Socket socketMock = mock(Socket.class);
+			byte[] buf = new byte[1024];
+			final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+			ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buf);
+			when(socketMock.getOutputStream()).thenReturn(byteArrayOutputStream);
+			when(socketMock.getInputStream()).thenReturn(byteArrayInputStream);
+			MessageManager m = MessageManager.getInstance(l, socketMock);
+			assertEquals(m, MessageManager.getInstance(l));
+			assertEquals(m, MessageManager.getInstance(l, socketMock));
+		} catch (ParameterException e) {
+			fail("Should not catch exception", e);
+		}
+	}
+
 }
