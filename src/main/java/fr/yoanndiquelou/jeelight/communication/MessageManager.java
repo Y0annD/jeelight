@@ -1,6 +1,5 @@
 package fr.yoanndiquelou.jeelight.communication;
 
-import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -44,8 +43,6 @@ public class MessageManager {
 			.compile("\\{\"method\":\"(.*)\",\"params\":(.*)\\}");
 	/** Object matcher. */
 	private static final Pattern objectPattern = Pattern.compile("\"([a-z]*)\":\"?(\\w*)\"?");
-	/** List of listeners. */
-	private List<PropertyChangeListener> mListeners;
 	/** command executor. */
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	/** Socket to communicate with Light. */
@@ -97,7 +94,6 @@ public class MessageManager {
 	 * @throws ParameterException parameter exception
 	 */
 	private MessageManager(Light light, Socket socket) throws ParameterException {
-		mListeners = new ArrayList<>();
 		mLight = light;
 		mSocket = socket;
 		mConnected = true;
@@ -161,26 +157,6 @@ public class MessageManager {
 	}
 
 	/**
-	 * Add a listener.
-	 * 
-	 * @param listener listener to add
-	 */
-	public void addListener(PropertyChangeListener listener) {
-		if (!mListeners.contains(listener)) {
-			mListeners.add(listener);
-		}
-	}
-
-	/**
-	 * Remove listener from list.
-	 * 
-	 * @param listener listener to remove
-	 */
-	public void removeListener(PropertyChangeListener listener) {
-		mListeners.remove(listener);
-	}
-
-	/**
 	 * Process the response or a notification sended by light.
 	 * 
 	 * @param data response
@@ -230,7 +206,7 @@ public class MessageManager {
 			String params = matcher.group(2).trim();
 			// Remove { and } chars at begin and end
 			params = params.substring(1, params.length() - 1);
-			logger.debug("Instance {}, Method: {}, params: {}", this, method, params);
+			logger.debug("Method: {}, params: {}", method, params);
 			if (PROPS.equals(method)) {
 				processPropertyNotification(params);
 			} else {
