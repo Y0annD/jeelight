@@ -1,9 +1,11 @@
 package fr.yoanndiquelou.jeelight.model;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import fr.yoanndiquelou.jeelight.annotation.Property;
 import fr.yoanndiquelou.jeelight.communication.MessageManager;
 import fr.yoanndiquelou.jeelight.exception.CommandException;
 import fr.yoanndiquelou.jeelight.exception.ParameterException;
@@ -88,6 +90,35 @@ public class EasyLight {
 	}
 
 	/**
+	 * Get property method.
+	 * 
+	 * @param properties array of property to retrieve
+	 * @return values of those properties, or empty string if not exist
+	 * @throws CommandException command unavailable
+	 */
+	public Object[] getProp(String... properties) throws CommandException {
+		executeCommand(Method.GET_PROP, (Object[])properties);
+		Object[] result = new Object[properties.length];
+		for (int i = 0; i < properties.length; i++) {
+			result[i] = "";
+			try {
+				Field[] fields = mLight.getClass().getDeclaredFields();
+				for(Field f: fields) {
+					Property annotation = f.getAnnotation(Property.class);
+					if(null != annotation && annotation.value().contentEquals(properties[i])) {
+						f.setAccessible(true);
+						result[i] = f.get(mLight);
+						f.setAccessible(false);
+					}
+				}
+			} catch (SecurityException | IllegalArgumentException | IllegalAccessException e) {
+				result[i] = "";
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * Toggle Light status.
 	 * 
 	 * @return new status of light
@@ -96,6 +127,15 @@ public class EasyLight {
 	public boolean toggle() throws CommandException {
 		executeCommand(Method.TOGGLE);
 		return mLight.isPower();
+	}
+
+	/**
+	 * Set the current state as default. Persisted in light memory.
+	 * 
+	 * @throws CommandException unavailable method
+	 */
+	public void setDefault() throws CommandException {
+		executeCommand(Method.SET_DEFAULT);
 	}
 
 	/**
@@ -635,6 +675,21 @@ public class EasyLight {
 	}
 
 	/**
+	 * Set music mode.
+	 * <p>
+	 * Do not forget to start a server.
+	 * </p>
+	 * 
+	 * @param turnOn turn on or turn off
+	 * @param host   host the IP address of the music server
+	 * @param port   the TCP port music application is listening on
+	 * @throws CommandException unavailable method
+	 */
+	public void setMusic(boolean turnOn, String host, int port) throws CommandException {
+		executeCommand(Method.SET_MUSIC, turnOn, host, port);
+	}
+
+	/**
 	 * Adjust property.
 	 * 
 	 * @param adjust   adjust type
@@ -649,8 +704,6 @@ public class EasyLight {
 	public void setAdjust(AdjustType adjust, String property) throws CommandException {
 		setAdjust(Method.SET_ADJUST, adjust, property);
 	}
-
-	// TODO: Music
 
 	/**
 	 * Toggle Light status.

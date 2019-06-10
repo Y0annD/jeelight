@@ -1,5 +1,6 @@
 package fr.yoanndiquelou.yeelight.model;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -126,6 +127,22 @@ public class EasyLightTest {
 		}
 
 		verify(mockManager).send(Method.TOGGLE);
+	}
+	
+	@DisplayName("Set default method")
+	@Test
+	public void testEasyLightSetDefault() {
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(mLight, mockManager);
+
+		when(mockManager.send(Method.SET_DEFAULT)).thenReturn(mFut);
+		try {
+			el.setDefault();
+		} catch (CommandException e) {
+			fail("Should not throw exception");
+		}
+
+		verify(mockManager).send(Method.SET_DEFAULT);
 	}
 
 	@DisplayName("Test start flow")
@@ -468,6 +485,23 @@ public class EasyLightTest {
 
 		verify(mockManager).send(Method.SET_BRIGHT, 1, EffectType.SMOOTH.getValue(), 100);
 	}
+	
+	@DisplayName("Test get property")
+	@Test
+	public void testGetProp() {
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(mLight, mockManager);
+
+		when(mockManager.send(Method.GET_PROP, "power", "not_exist", "bright")).thenReturn(mFut);
+		try {
+			Object[] result =el.getProp("power", "not_exist", "bright");
+			assertArrayEquals(new Object[] {mLight.isPower(), "", mLight.getBrightness()}, result);
+		} catch (CommandException e) {
+			fail("Should not throw exception");
+		}
+
+		verify(mockManager).send(Method.GET_PROP, "power", "not_exist", "bright");
+	}
 
 	@DisplayName("Test set power")
 	@Test
@@ -515,6 +549,22 @@ public class EasyLightTest {
 		}
 
 		verify(mockManager).send(Method.BG_TOGGLE);
+	}
+	
+	@DisplayName("Test set music method")
+	@Test
+	public void testEasySetMusicToggle() {
+		MessageManager mockManager = mock(MessageManager.class);
+		EasyLight el = new EasyLight(mLight, mockManager);
+
+		when(mockManager.send(Method.SET_MUSIC, true, "127.0.0.1", 1234)).thenReturn(mFut);
+		try {
+			el.setMusic(true, "127.0.0.1", 1234);
+		} catch (CommandException e) {
+			fail("Should not throw exception");
+		}
+
+		verify(mockManager).send(Method.SET_MUSIC, true, "127.0.0.1", 1234);
 	}
 
 	@DisplayName("Test bg set color temperature")

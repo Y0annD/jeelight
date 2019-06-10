@@ -8,6 +8,7 @@ import java.util.Map;
 import fr.yoanndiquelou.jeelight.exception.ParameterException;
 
 public enum Method {
+	GET_PROP("get_prop", String[].class),
 	SET_CT_ABX("set_ct_abx", Integer.class, String.class, Integer.class),
 	SET_RGB("set_rgb", Integer.class, String.class, Integer.class),
 	SET_HSV("set_hsv", Integer.class, Integer.class, String.class, Integer.class),
