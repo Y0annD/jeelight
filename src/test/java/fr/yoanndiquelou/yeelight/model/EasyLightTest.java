@@ -264,7 +264,7 @@ public class EasyLightTest {
 			el.setScene(SceneClass.CT, 1499, 1);
 		});
 		assertThrows(CommandException.class, () -> {
-			el.setScene(SceneClass.CT, 5901, 1);
+			el.setScene(SceneClass.CT, 7901, 1);
 		});
 		assertThrows(CommandException.class, () -> {
 			el.setScene(SceneClass.AUTO_DELAY_OFF, 0, 1);
@@ -346,7 +346,7 @@ public class EasyLightTest {
 			el.setBgScene(SceneClass.CT, 1499, 1);
 		});
 		assertThrows(CommandException.class, () -> {
-			el.setBgScene(SceneClass.CT, 5901, 1);
+			el.setBgScene(SceneClass.CT, 7901, 1);
 		});
 		assertThrows(CommandException.class, () -> {
 			el.setBgScene(SceneClass.AUTO_DELAY_OFF, 0, 1);

@@ -5,6 +5,9 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
+
+import fr.yoanndiquelou.jeelight.annotation.CheckIntegerInterval;
 import fr.yoanndiquelou.jeelight.annotation.Property;
 import fr.yoanndiquelou.jeelight.communication.MessageManager;
 import fr.yoanndiquelou.jeelight.exception.CommandException;
@@ -106,15 +109,15 @@ public class EasyLight implements ILight {
 	 */
 	@Override
 	public Object[] getProp(String... properties) throws CommandException {
-		executeCommand(Method.GET_PROP, (Object[])properties);
+		executeCommand(Method.GET_PROP, (Object[]) properties);
 		Object[] result = new Object[properties.length];
 		for (int i = 0; i < properties.length; i++) {
 			result[i] = "";
 			try {
 				Field[] fields = mLight.getClass().getDeclaredFields();
-				for(Field f: fields) {
+				for (Field f : fields) {
 					Property annotation = f.getAnnotation(Property.class);
-					if(null != annotation && annotation.field().contentEquals(properties[i])) {
+					if (null != annotation && annotation.field().contentEquals(properties[i])) {
 						f.setAccessible(true);
 						result[i] = f.get(mLight);
 						f.setAccessible(false);
@@ -360,7 +363,13 @@ public class EasyLight implements ILight {
 	 * @throws CommandException unavailable method
 	 */
 	private int setCtAbx(Method method, int temperature) throws CommandException {
-		if (temperature > 6500 || temperature < 1700) {
+		String attributeName;
+		if (Method.BG_SET_CT_ABX.equals(method)) {
+			attributeName = "bg_ct";
+		} else {
+			attributeName = "ct";
+		}
+		if (isAttributeInvalid(attributeName, temperature)) {
 			throw new IllegalArgumentException("Color temperature should be between 1700K and 6500K");
 		}
 
@@ -426,6 +435,15 @@ public class EasyLight implements ILight {
 	 * @throws CommandException unavailable method
 	 */
 	private int setRgb(Method method, int mergedValue) throws CommandException {
+		String attributeName;
+		if(Method.SET_RGB.equals(method)) {
+			attributeName = "rgb";
+		} else {
+			attributeName = "bg_rgb";
+		}
+		if(isAttributeInvalid(attributeName, mergedValue)) {
+			throw new IllegalArgumentException("Color temperature should be between 1 and 16777215");
+		}
 		executeCommand(method, mergedValue, mEffect.getValue(), mDuration);
 		if (Method.SET_RGB.equals(method)) {
 			return mLight.getRGB();
@@ -467,10 +485,10 @@ public class EasyLight implements ILight {
 	 */
 	@Override
 	public void setHsv(Method method, int hue, int sat) throws CommandException {
-		if (hue < 0 || hue > 359) {
+		if (isAttributeInvalid("hue", hue)) {
 			throw new IllegalArgumentException("Hue must be positive and lower than 360");
 		}
-		if (sat < 0 || sat > 100) {
+		if (isAttributeInvalid("sat", sat)) {
 			throw new IllegalArgumentException("Sat must be positive and lower than 100");
 		}
 		executeCommand(method, hue, sat, mEffect.getValue(), mDuration);
@@ -496,7 +514,7 @@ public class EasyLight implements ILight {
 	 * @throws CommandException something goes wrong
 	 */
 	private int setBright(Method method, int bright) throws CommandException {
-		if (bright < 0 || bright > 100) {
+		if (isAttributeInvalid("bright", bright)) {
 			throw new IllegalArgumentException("Bright must be positive and lower than 100");
 		}
 		executeCommand(method, bright, mEffect.getValue(), mDuration);
@@ -569,21 +587,21 @@ public class EasyLight implements ILight {
 	 */
 	private void setScene(Method method, SceneClass scClass, int val1, int brightness) throws CommandException {
 		if (scClass.equals(SceneClass.COLOR)) {
-			if (val1 < 0 || val1 > 0xFFFFFF) {
+			if (isAttributeInvalid("rgb", val1)) {
 				throw new CommandException("Color must be between 0 and 0xffffff");
 			}
 		} else if (scClass.equals(SceneClass.CT)) {
-			if (val1 < 1500 || val1 > 5900) {
+			if (isAttributeInvalid("ct", val1)) {
 				throw new CommandException("Color temperature must be between 1500 and 5900");
 			}
 		} else if (scClass.equals(SceneClass.AUTO_DELAY_OFF)) {
-			if (val1 < 1) {
+			if (isAttributeInvalid("delayoff", val1)) {
 				throw new CommandException("Timer must be at least 1");
 			}
 		} else {
 			throw new CommandException(scClass.toString() + " could not be executed with this constructor");
 		}
-		if (brightness > 100 || brightness < 0) {
+		if (isAttributeInvalid("bright", brightness)) {
 			throw new CommandException("Brightness must be between 0 and 100");
 		}
 		if (scClass.equals(SceneClass.AUTO_DELAY_OFF)) {
@@ -616,7 +634,7 @@ public class EasyLight implements ILight {
 	 * @param val2
 	 *                <ul>
 	 *                <li>Saturation for HSV class</li>
-	 *                <li>for CF class</li>
+	 *                <li>Action for CF class</li>
 	 *                </ul>
 	 * @param val3
 	 *                <ul>
@@ -628,14 +646,14 @@ public class EasyLight implements ILight {
 	@Override
 	public void setScene(Method method, SceneClass scClass, int val1, int val2, Object val3) throws CommandException {
 		if (scClass.equals(SceneClass.HSV)) {
-			if (val1 < 0 || val1 > 359) {
+			if (isAttributeInvalid("hue", val1)) {
 				throw new CommandException("Hue must be between 0 and 359");
 			}
-			if (val2 < 0 || val2 > 100) {
+			if (isAttributeInvalid("sat", val2)) {
 				throw new CommandException("Saturation must be between 0 and 100");
 			}
-			if (!(val3 instanceof Integer) || (int) val3 < 0 || (int) val3 > 100) {
-				throw new CommandException("Saturation must be between 0 and 100");
+			if (!(val3 instanceof Integer) || isAttributeInvalid("bright", (int)val3)) {
+				throw new CommandException("Brightness must be between 0 and 100");
 			}
 		} else if (scClass.equals(SceneClass.CF)) {
 			if (val1 < 0) {
@@ -885,5 +903,27 @@ public class EasyLight implements ILight {
 	@Override
 	public Light getLight() {
 		return mLight;
+	}
+
+	/**
+	 * Check if an integer attribute is in the defined interval.
+	 * 
+	 * @param attributeName attribute to check
+	 * @param value         value to check
+	 * @return true if in interval, false otherwise
+	 */
+	private boolean isAttributeInvalid(final String attributeName, int value) {
+		boolean result = false;
+		for (Field field : mLight.getClass().getDeclaredFields()) {
+			if (field.isAnnotationPresent(Property.class)
+					&& field.getAnnotation(Property.class).field().contentEquals(attributeName)) {
+				if (field.isAnnotationPresent(CheckIntegerInterval.class)
+						&& (value < field.getAnnotation(CheckIntegerInterval.class).min()
+								|| value > field.getAnnotation(CheckIntegerInterval.class).max())) {
+					result = true;
+				}
+			}
+		}
+		return result;
 	}
 }
