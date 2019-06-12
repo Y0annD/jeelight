@@ -24,12 +24,13 @@ import fr.yoanndiquelou.jeelight.exception.CommandException;
 import fr.yoanndiquelou.jeelight.model.AdjustType;
 import fr.yoanndiquelou.jeelight.model.ColorFlowEnd;
 import fr.yoanndiquelou.jeelight.model.ColorMode;
-import fr.yoanndiquelou.jeelight.model.EasyLight;
 import fr.yoanndiquelou.jeelight.model.EffectType;
 import fr.yoanndiquelou.jeelight.model.FlowColor;
+import fr.yoanndiquelou.jeelight.model.ILight;
 import fr.yoanndiquelou.jeelight.model.Light;
 import fr.yoanndiquelou.jeelight.model.Method;
 import fr.yoanndiquelou.jeelight.model.SceneClass;
+import fr.yoanndiquelou.jeelight.model.impl.EasyLight;
 
 @DisplayName("Test the easylight object")
 public class EasyLightTest {
@@ -117,7 +118,7 @@ public class EasyLightTest {
 	@Test
 	public void testEasyLightToggle() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		when(mockManager.send(Method.TOGGLE)).thenReturn(mFut);
 		try {
@@ -133,7 +134,7 @@ public class EasyLightTest {
 	@Test
 	public void testEasyLightSetDefault() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		when(mockManager.send(Method.SET_DEFAULT)).thenReturn(mFut);
 		try {
@@ -149,7 +150,7 @@ public class EasyLightTest {
 	@Test
 	public void testStartFlow() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 		List<FlowColor> flow = new ArrayList<>();
 		flow.add(new FlowColor(ColorMode.COLOR, 12345, 75, 100));
 		flow.add(new FlowColor(ColorMode.TEMPERATURE, 12345, 75, 100));
@@ -168,7 +169,7 @@ public class EasyLightTest {
 	@Test
 	public void testStopFlow() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 		when(mockManager.send(Method.STOP_CF)).thenReturn(mFut);
 		try {
 			el.stopCf();
@@ -183,7 +184,7 @@ public class EasyLightTest {
 	@Test
 	public void testAddCron() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 		when(mockManager.send(Method.CRON_ADD, 0, 1)).thenReturn(mFut);
 		try {
 			el.setCron(1);
@@ -198,7 +199,7 @@ public class EasyLightTest {
 	@Test
 	public void testGetCron() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 		when(mockManager.send(Method.CRON_GET, 0)).thenReturn(mFut);
 		try {
 			el.getCron();
@@ -213,7 +214,7 @@ public class EasyLightTest {
 	@Test
 	public void testDelCron() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 		when(mockManager.send(Method.CRON_DEL, 0)).thenReturn(mFut);
 		try {
 			el.delCron();
@@ -228,7 +229,7 @@ public class EasyLightTest {
 	@Test
 	public void testSetScene() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 		when(mockManager.send(Method.SET_SCENE, SceneClass.AUTO_DELAY_OFF.getValue(), 50, 5)).thenReturn(mFut);
 		when(mockManager.send(Method.SET_SCENE, SceneClass.COLOR.getValue(), 65280, 70)).thenReturn(mFut);
 		when(mockManager.send(Method.SET_SCENE, SceneClass.CT.getValue(), 5400, 100)).thenReturn(mFut);
@@ -310,7 +311,7 @@ public class EasyLightTest {
 	@Test
 	public void testSetBgScene() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 		when(mockManager.send(Method.BG_SET_SCENE, SceneClass.AUTO_DELAY_OFF.getValue(), 50, 5)).thenReturn(mFut);
 		when(mockManager.send(Method.BG_SET_SCENE, SceneClass.COLOR.getValue(), 65280, 70)).thenReturn(mFut);
 		when(mockManager.send(Method.BG_SET_SCENE, SceneClass.CT.getValue(), 5400, 100)).thenReturn(mFut);
@@ -392,7 +393,7 @@ public class EasyLightTest {
 	@Test
 	public void testSetCtAbx() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		assertThrows(IllegalArgumentException.class, () -> {
 			el.setCtAbx(65001);
@@ -414,7 +415,7 @@ public class EasyLightTest {
 	@Test
 	public void testSetRgbWithValues() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		when(mockManager.send(Method.SET_RGB, 16777215, EffectType.SMOOTH.getValue(), 100)).thenReturn(mFut);
 		try {
@@ -439,7 +440,7 @@ public class EasyLightTest {
 	@Test
 	public void testSetHsv() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		assertThrows(IllegalArgumentException.class, () -> {
 			el.setHsv(-1, 1);
@@ -467,7 +468,7 @@ public class EasyLightTest {
 	@Test
 	public void testSetBright() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		assertThrows(IllegalArgumentException.class, () -> {
 			el.setBright(-1);
@@ -490,7 +491,7 @@ public class EasyLightTest {
 	@Test
 	public void testGetProp() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		when(mockManager.send(Method.GET_PROP, "power", "not_exist", "bright")).thenReturn(mFut);
 		try {
@@ -507,7 +508,7 @@ public class EasyLightTest {
 	@Test
 	public void testSetPower() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		when(mockManager.send(Method.SET_POWER, "on", EffectType.SMOOTH.getValue(), 100)).thenReturn(mFut);
 		try {
@@ -523,7 +524,7 @@ public class EasyLightTest {
 	@Test
 	public void testSetName() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		when(mockManager.send(Method.SET_NAME, "Name")).thenReturn(mFut);
 		try {
@@ -539,7 +540,7 @@ public class EasyLightTest {
 	@Test
 	public void testEasyBgLightToggle() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		when(mockManager.send(Method.BG_TOGGLE)).thenReturn(mFut);
 		try {
@@ -555,7 +556,7 @@ public class EasyLightTest {
 	@Test
 	public void testEasySetMusicToggle() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		when(mockManager.send(Method.SET_MUSIC, true, "127.0.0.1", 1234)).thenReturn(mFut);
 		try {
@@ -571,7 +572,7 @@ public class EasyLightTest {
 	@Test
 	public void testbgSetCtAbx() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		assertThrows(IllegalArgumentException.class, () -> {
 			el.setBgCtAbx(65001);
@@ -593,7 +594,7 @@ public class EasyLightTest {
 	@Test
 	public void testSetBgRgbWithValues() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		when(mockManager.send(Method.BG_SET_RGB, 16777215, EffectType.SMOOTH.getValue(), 100)).thenReturn(mFut);
 		try {
@@ -618,7 +619,7 @@ public class EasyLightTest {
 	@Test
 	public void testSetBgHsv() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		assertThrows(IllegalArgumentException.class, () -> {
 			el.setBgHsv(-1, 1);
@@ -646,7 +647,7 @@ public class EasyLightTest {
 	@Test
 	public void testSetBgBright() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		assertThrows(IllegalArgumentException.class, () -> {
 			el.setBgBright(-1);
@@ -669,7 +670,7 @@ public class EasyLightTest {
 	@Test
 	public void testAdjustBright() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		assertThrows(IllegalArgumentException.class, () -> {
 			el.adjustBright(-101, 30);
@@ -695,7 +696,7 @@ public class EasyLightTest {
 	@Test
 	public void testAdjustCt() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		assertThrows(IllegalArgumentException.class, () -> {
 			el.adjustColorTemperature(-101, 30);
@@ -721,7 +722,7 @@ public class EasyLightTest {
 	@Test
 	public void testAdjustColor() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		assertThrows(IllegalArgumentException.class, () -> {
 			el.adjustColor(-101, 30);
@@ -747,7 +748,7 @@ public class EasyLightTest {
 	@Test
 	public void testBgAdjustBright() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		assertThrows(IllegalArgumentException.class, () -> {
 			el.bgAdjustBright(-101, 30);
@@ -773,7 +774,7 @@ public class EasyLightTest {
 	@Test
 	public void testBgAdjustCt() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		assertThrows(IllegalArgumentException.class, () -> {
 			el.bgAdjustColorTemperature(-101, 30);
@@ -799,7 +800,7 @@ public class EasyLightTest {
 	@Test
 	public void testBgAdjustColor() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		assertThrows(IllegalArgumentException.class, () -> {
 			el.bgAdjustColor(-101, 30);
@@ -825,7 +826,7 @@ public class EasyLightTest {
 	@Test
 	public void testSetBgPower() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		when(mockManager.send(Method.BG_SET_POWER, "off", EffectType.SMOOTH.getValue(), 100)).thenReturn(mFut);
 		try {
@@ -841,7 +842,7 @@ public class EasyLightTest {
 	@Test
 	public void testSetAdjust() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		assertThrows(IllegalArgumentException.class, () -> {
 			el.setAdjust(AdjustType.INCREASE, "color");
@@ -881,7 +882,7 @@ public class EasyLightTest {
 	public void testSetBgAdjust() {
 
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		assertThrows(IllegalArgumentException.class, () -> {
 			el.setBgAdjust(AdjustType.INCREASE, "color");
@@ -905,7 +906,7 @@ public class EasyLightTest {
 	public void testUnavailableCommand() {
 		mLight.removeMethod(Method.BG_SET_POWER);
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 
 		assertThrows(CommandException.class, () -> {
 			el.setBgPower(false);
@@ -916,7 +917,7 @@ public class EasyLightTest {
 	@Test
 	public void testGetLight() {
 		MessageManager mockManager = mock(MessageManager.class);
-		EasyLight el = new EasyLight(mLight, mockManager);
+		ILight el = new EasyLight(mLight, mockManager);
 		assertEquals(mLight, el.getLight());
 	}
 }

@@ -1,4 +1,4 @@
-package fr.yoanndiquelou.jeelight.model;
+package fr.yoanndiquelou.jeelight.model.impl;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -9,6 +9,14 @@ import fr.yoanndiquelou.jeelight.annotation.Property;
 import fr.yoanndiquelou.jeelight.communication.MessageManager;
 import fr.yoanndiquelou.jeelight.exception.CommandException;
 import fr.yoanndiquelou.jeelight.exception.ParameterException;
+import fr.yoanndiquelou.jeelight.model.AdjustType;
+import fr.yoanndiquelou.jeelight.model.ColorFlowEnd;
+import fr.yoanndiquelou.jeelight.model.EffectType;
+import fr.yoanndiquelou.jeelight.model.FlowColor;
+import fr.yoanndiquelou.jeelight.model.ILight;
+import fr.yoanndiquelou.jeelight.model.Light;
+import fr.yoanndiquelou.jeelight.model.Method;
+import fr.yoanndiquelou.jeelight.model.SceneClass;
 
 /**
  * Light with actions managed in an easy way.
@@ -16,7 +24,7 @@ import fr.yoanndiquelou.jeelight.exception.ParameterException;
  * @author Y0annD
  *
  */
-public class EasyLight {
+public class EasyLight implements ILight {
 	/** associated light. */
 	private Light mLight;
 	/** Messaging to manage light. */
@@ -96,6 +104,7 @@ public class EasyLight {
 	 * @return values of those properties, or empty string if not exist
 	 * @throws CommandException command unavailable
 	 */
+	@Override
 	public Object[] getProp(String... properties) throws CommandException {
 		executeCommand(Method.GET_PROP, (Object[])properties);
 		Object[] result = new Object[properties.length];
@@ -105,7 +114,7 @@ public class EasyLight {
 				Field[] fields = mLight.getClass().getDeclaredFields();
 				for(Field f: fields) {
 					Property annotation = f.getAnnotation(Property.class);
-					if(null != annotation && annotation.value().contentEquals(properties[i])) {
+					if(null != annotation && annotation.field().contentEquals(properties[i])) {
 						f.setAccessible(true);
 						result[i] = f.get(mLight);
 						f.setAccessible(false);
@@ -124,6 +133,7 @@ public class EasyLight {
 	 * @return new status of light
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public boolean toggle() throws CommandException {
 		executeCommand(Method.TOGGLE);
 		return mLight.isPower();
@@ -134,6 +144,7 @@ public class EasyLight {
 	 * 
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public void setDefault() throws CommandException {
 		executeCommand(Method.SET_DEFAULT);
 	}
@@ -145,6 +156,7 @@ public class EasyLight {
 	 * @param flow list of changes in flow
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public void startCf(ColorFlowEnd end, List<FlowColor> flow) throws CommandException {
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < flow.size(); i++) {
@@ -161,6 +173,7 @@ public class EasyLight {
 	 * 
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public void stopCf() throws CommandException {
 		executeCommand(Method.STOP_CF);
 	}
@@ -173,6 +186,7 @@ public class EasyLight {
 	 * @return new brightness
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public int adjustBright(int percentage, int duration) throws CommandException {
 		return adjustBright(Method.ADJUST_BRIGHT, percentage, duration);
 	}
@@ -185,6 +199,7 @@ public class EasyLight {
 	 * @return new brightness
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public int bgAdjustBright(int percentage, int duration) throws CommandException {
 		return adjustBright(Method.BG_ADJUST_BRIGHT, percentage, duration);
 	}
@@ -222,6 +237,7 @@ public class EasyLight {
 	 * @return new brightness
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public int adjustColorTemperature(int percentage, int duration) throws CommandException {
 		return adjustColorTemperature(Method.ADJUST_CT, percentage, duration);
 	}
@@ -234,6 +250,7 @@ public class EasyLight {
 	 * @return new brightness
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public int adjustColor(int percentage, int duration) throws CommandException {
 		return adjustColor(Method.ADJUST_COLOR, percentage, duration);
 	}
@@ -269,6 +286,7 @@ public class EasyLight {
 	 * @return new brightness
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public int bgAdjustColor(int percentage, int duration) throws CommandException {
 		return adjustColor(Method.BG_ADJUST_COLOR, percentage, duration);
 	}
@@ -305,6 +323,7 @@ public class EasyLight {
 	 * @return new brightness
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public int bgAdjustColorTemperature(int percentage, int duration) throws CommandException {
 		return adjustColorTemperature(Method.BG_ADJUST_CT, percentage, duration);
 	}
@@ -322,6 +341,7 @@ public class EasyLight {
 	 * @param duration    Should be higher or equals than 30 ms
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public int setCtAbx(int temperature) throws CommandException {
 		return setCtAbx(Method.SET_CT_ABX, temperature);
 	}
@@ -365,6 +385,7 @@ public class EasyLight {
 	 * @param duration    Should be higher or equals than 30 ms
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public int setBgCtAbx(int temperature) throws CommandException {
 		return setCtAbx(Method.BG_SET_CT_ABX, temperature);
 	}
@@ -378,6 +399,7 @@ public class EasyLight {
 	 * @return new color as following [red, green, blue]
 	 * @throws CommandException something goes wrong
 	 */
+	@Override
 	public int[] setRgb(int red, int green, int blue) throws CommandException {
 		return setRgb(Method.SET_RGB, red, green, blue);
 	}
@@ -419,6 +441,7 @@ public class EasyLight {
 	 * @return new color
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public int setRgb(int mergedValue) throws CommandException {
 		return setRgb(Method.SET_RGB, mergedValue);
 	}
@@ -430,6 +453,7 @@ public class EasyLight {
 	 * @param sat saturation value
 	 * @throws CommandException something goes wrong
 	 */
+	@Override
 	public void setHsv(int hue, int sat) throws CommandException {
 		setHsv(Method.SET_HSV, hue, sat);
 	}
@@ -441,6 +465,7 @@ public class EasyLight {
 	 * @param sat saturation value
 	 * @throws CommandException something goes wrong
 	 */
+	@Override
 	public void setHsv(Method method, int hue, int sat) throws CommandException {
 		if (hue < 0 || hue > 359) {
 			throw new IllegalArgumentException("Hue must be positive and lower than 360");
@@ -458,6 +483,7 @@ public class EasyLight {
 	 * @return new brightness
 	 * @throws CommandException something goes wrong
 	 */
+	@Override
 	public int setBright(int bright) throws CommandException {
 		return setBright(Method.SET_BRIGHT, bright);
 	}
@@ -488,6 +514,7 @@ public class EasyLight {
 	 * @return new power value
 	 * @throws CommandException command could not be executed
 	 */
+	@Override
 	public boolean setPower(boolean power) throws CommandException {
 		executeCommand(Method.SET_POWER, getPowerStr(power), mEffect.getValue(), mDuration);
 		return mLight.isPower();
@@ -505,6 +532,7 @@ public class EasyLight {
 	 * @param brightness brightness
 	 * @throws CommandException command could not be executed
 	 */
+	@Override
 	public void setScene(SceneClass scClass, int val1, int brightness) throws CommandException {
 		setScene(Method.SET_SCENE, scClass, val1, brightness);
 	}
@@ -521,6 +549,7 @@ public class EasyLight {
 	 * @param brightness brightness
 	 * @throws CommandException command could not be executed
 	 */
+	@Override
 	public void setBgScene(SceneClass scClass, int val1, int brightness) throws CommandException {
 		setScene(Method.BG_SET_SCENE, scClass, val1, brightness);
 	}
@@ -565,10 +594,12 @@ public class EasyLight {
 		}
 	}
 
+	@Override
 	public void setScene(SceneClass scClass, int val1, int val2, Object val3) throws CommandException {
 		setScene(Method.SET_SCENE, scClass, val1, val2, val3);
 	}
 
+	@Override
 	public void setBgScene(SceneClass scClass, int val1, int val2, Object val3) throws CommandException {
 		setScene(Method.BG_SET_SCENE, scClass, val1, val2, val3);
 	}
@@ -594,6 +625,7 @@ public class EasyLight {
 	 *                </ul>
 	 * @throws CommandException
 	 */
+	@Override
 	public void setScene(Method method, SceneClass scClass, int val1, int val2, Object val3) throws CommandException {
 		if (scClass.equals(SceneClass.HSV)) {
 			if (val1 < 0 || val1 > 359) {
@@ -625,6 +657,7 @@ public class EasyLight {
 	 * @return new time
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public int setCron(int time) throws CommandException {
 		executeCommand(Method.CRON_ADD, 0, time);
 		return mLight.getCron();
@@ -636,6 +669,7 @@ public class EasyLight {
 	 * @return time before switch off
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public int getCron() throws CommandException {
 		executeCommand(Method.CRON_GET, 0);
 		return mLight.getCron();
@@ -646,6 +680,7 @@ public class EasyLight {
 	 * 
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public void delCron() throws CommandException {
 		executeCommand(Method.CRON_DEL, 0);
 	}
@@ -685,6 +720,7 @@ public class EasyLight {
 	 * @param port   the TCP port music application is listening on
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public void setMusic(boolean turnOn, String host, int port) throws CommandException {
 		executeCommand(Method.SET_MUSIC, turnOn, host, port);
 	}
@@ -701,6 +737,7 @@ public class EasyLight {
 	 *                 </ul>
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public void setAdjust(AdjustType adjust, String property) throws CommandException {
 		setAdjust(Method.SET_ADJUST, adjust, property);
 	}
@@ -711,6 +748,7 @@ public class EasyLight {
 	 * @return new status of light
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public boolean bgToggle() throws CommandException {
 		executeCommand(Method.BG_TOGGLE);
 		return mLight.isBgPower();
@@ -725,6 +763,7 @@ public class EasyLight {
 	 * @return new value as following [red, green, blue]
 	 * @throws CommandException something goes wrong
 	 */
+	@Override
 	public int[] setBgRgb(int red, int green, int blue) throws CommandException {
 		return setRgb(Method.BG_SET_RGB, red, green, blue);
 	}
@@ -736,6 +775,7 @@ public class EasyLight {
 	 * @return new background rgb value
 	 * @throws CommandException something goes wrong
 	 */
+	@Override
 	public int setBgRgb(int mergedValue) throws CommandException {
 		return setRgb(Method.BG_SET_RGB, mergedValue);
 	}
@@ -747,6 +787,7 @@ public class EasyLight {
 	 * @param sat background saturation
 	 * @throws CommandException something goes wrong
 	 */
+	@Override
 	public void setBgHsv(int hue, int sat) throws CommandException {
 		setHsv(Method.BG_SET_HSV, hue, sat);
 	}
@@ -758,6 +799,7 @@ public class EasyLight {
 	 * @return background brightness
 	 * @throws CommandException something goes wrong
 	 */
+	@Override
 	public int setBgBright(int bright) throws CommandException {
 		return setBright(Method.BG_SET_BRIGHT, bright);
 	}
@@ -779,6 +821,7 @@ public class EasyLight {
 	 * @return background power status
 	 * @throws CommandException something goes wrong
 	 */
+	@Override
 	public boolean setBgPower(boolean power) throws CommandException {
 		executeCommand(Method.BG_SET_POWER, getPowerStr(power), mEffect.getValue(), mDuration);
 		return mLight.isBgPower();
@@ -796,6 +839,7 @@ public class EasyLight {
 	 *                 </ul>
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public void setBgAdjust(AdjustType adjust, String property) throws CommandException {
 		setAdjust(Method.BG_SET_ADJUST, adjust, property);
 	}
@@ -807,6 +851,7 @@ public class EasyLight {
 	 * @return new Device name
 	 * @throws CommandException unavailable method
 	 */
+	@Override
 	public String setName(String name) throws CommandException {
 		executeCommand(Method.SET_NAME, name);
 		return mLight.getName();
@@ -837,6 +882,7 @@ public class EasyLight {
 	 * 
 	 * @return associated light
 	 */
+	@Override
 	public Light getLight() {
 		return mLight;
 	}

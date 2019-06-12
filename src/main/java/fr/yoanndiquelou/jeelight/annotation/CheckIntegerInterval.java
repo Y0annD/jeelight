@@ -12,7 +12,10 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Property {
-	/** Field name. */	
-	public String field() default "";
+public @interface CheckIntegerInterval {
+	/** Minimum value. */
+	public int min() default Integer.MIN_VALUE;
+	/** Maximum value. */
+	public int max() default Integer.MAX_VALUE;
+
 }

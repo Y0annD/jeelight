@@ -2,6 +2,7 @@ package fr.yoanndiquelou.yeelight.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -14,6 +15,7 @@ import java.util.Random;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import fr.yoanndiquelou.jeelight.exception.ParameterException;
 import fr.yoanndiquelou.jeelight.model.Light;
 import fr.yoanndiquelou.jeelight.model.Method;
 
@@ -123,6 +125,25 @@ public class LightTest {
 			assertEquals(20, light.getAvailableMethods().size());
 		} catch (IOException  e) {
 			fail("Unable to test static construction", e);
+		}
+	}
+	
+	@Test
+	@DisplayName("Test update from method")
+	public void testUpdateFromMethod() {
+		assertThrows(ParameterException.class, ()->{
+			mLight.updateFromMethod("bright", "101");
+		});
+		assertThrows(ParameterException.class, ()->{
+			mLight.updateFromMethod("bright", "0");
+		});
+		try {
+			mLight.updateFromMethod("name", "John Doe");
+			mLight.updateFromMethod("bright", "50");
+			assertEquals("John Doe", mLight.getName());
+			assertEquals(50, mLight.getBrightness());
+		}catch(ParameterException e) {
+			fail("Should not thrown exception");
 		}
 	}
 

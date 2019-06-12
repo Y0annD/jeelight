@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import fr.yoanndiquelou.jeelight.annotation.CheckIntegerInterval;
 import fr.yoanndiquelou.jeelight.annotation.Property;
 import fr.yoanndiquelou.jeelight.exception.ParameterException;
 import fr.yoanndiquelou.jeelight.utils.AttributeParser;
@@ -34,64 +35,79 @@ public class Light {
 	/** Firmware version. */
 	private int mFirmware;
 	/** Power status. */
-	@Property("power")
+	@Property(field = "power")
 	private boolean mPower;
 	/** Background power status. */
-	@Property("bg_power")
+	@Property(field = "bg_power")
 	private boolean mBgPower;
 	/** Brightness. */
-	@Property("bright")
+	@Property(field = "bright")
+	@CheckIntegerInterval(min = 1, max = 100)
 	private int mBrightness;
 	/** Background brightness. */
-	@Property("bg_bright")
+	@Property(field = "bg_bright")
+	@CheckIntegerInterval(min = 1, max = 100)
 	private int mBgBrightness;
 	/** Color mode. */
-	@Property("color_mode")
+	@Property(field = "color_mode")
+	@CheckIntegerInterval(min = 1, max = 3)
 	private int mColorMode;
 	/** Background color mode. */
-	@Property("bg_lmode")
+	@Property(field = "bg_lmode")
+	@CheckIntegerInterval(min = 1, max = 3)
 	private int mBgColorMode;
 	/** Color temperature. */
-	@Property("ct")
+	@Property(field = "ct")
+	@CheckIntegerInterval(min = 1700, max = 6500)
 	private int mCt;
 	/** Background color temperature. */
-	@Property("bg_ct")
+	@Property(field = "bg_ct")
+	@CheckIntegerInterval(min = 1700, max = 6500)
 	private int mBgCt;
 	/** rgb. */
-	@Property("rgb")
+	@Property(field = "rgb")
+	@CheckIntegerInterval(min = 1, max = 16777215)
 	private int mRgb;
 	/** Background color. */
-	@Property("bg_rgb")
+	@Property(field = "bg_rgb")
+	@CheckIntegerInterval(min = 1, max = 16777215)
 	private int mBgRgb;
 	/** Hue. */
-	@Property("hue")
+	@Property(field = "hue")
+	@CheckIntegerInterval(min = 0, max = 359)
 	private int mHue;
 	/** Background hue. */
-	@Property("bg_hue")
+	@Property(field = "bg_hue")
+	@CheckIntegerInterval(min = 0, max = 359)
 	private int mBgHue;
 	/** Saturation. */
-	@Property("sat")
+	@Property(field = "sat")
+	@CheckIntegerInterval(min = 0, max = 100)
 	private int mSaturation;
 	/** Background saturation. */
-	@Property("bg_sat")
+	@Property(field = "bg_sat")
+	@CheckIntegerInterval(min = 0, max = 100)
 	private int mBgSaturation;
 	/** Name. */
-	@Property("name")
+	@Property(field = "name")
 	private String mName;
 	/** Delay. */
-	@Property("delayoff")
+	@Property(field = "delayoff")
+	@CheckIntegerInterval(min = 1, max = 60)
 	private int mCron;
 	/** Flowing. */
-	@Property("flowing")
+	@Property(field = "flowing")
+	@CheckIntegerInterval(min = 0, max = 1)
 	private int mFlowing;
 	/** Background flowing. */
-	@Property("bg_flowing")
+	@Property(field = "bg_flowing")
+	@CheckIntegerInterval(min = 0, max = 1)
 	private int mBgFlowing;
 	/** Flow params. */
-	@Property("flow_params")
+	@Property(field = "flow_params")
 	private String mFlowParams = "";
 	/** Background flow params. */
-	@Property("bg_flow_params")
+	@Property(field = "bg_flow_params")
 	private String mBgFlowParams = "";
 	/**
 	 * Music On.
@@ -101,10 +117,12 @@ public class Light {
 	 * respond to your commands
 	 * </p>
 	 */
-	@Property("music_on")
+	@Property(field = "music_on")
+	@CheckIntegerInterval(min = 0, max = 1)
 	private int mMusic;
 	/** Brightness of night mode. */
-	@Property("nl_br")
+	@Property(field = "nl_br")
+	@CheckIntegerInterval(min = 1, max = 100)
 	private int mNightBright;
 	/**
 	 * Active mode.
@@ -112,7 +130,8 @@ public class Light {
 	 * Only for ceiling light.
 	 * </p>
 	 */
-	@Property("active_mode")
+	@Property(field = "active_mode")
+	@CheckIntegerInterval(min = 0, max = 1)
 	private int mActiveMode;
 	/** List of listeners. */
 	private Set<PropertyChangeListener> mListeners;
@@ -629,11 +648,18 @@ public class Light {
 	public Light updateFromMethod(String property, String param) throws ParameterException {
 		for (Field field : this.getClass().getDeclaredFields()) {
 			if (field.isAnnotationPresent(Property.class)
-					&& field.getAnnotation(Property.class).value().contentEquals(property)) {
+					&& field.getAnnotation(Property.class).field().contentEquals(property)) {
 				try {
 					Object newValue = AttributeParser.parse(param);
+					if (field.isAnnotationPresent(CheckIntegerInterval.class)
+							&& ((int) newValue < field.getAnnotation(CheckIntegerInterval.class).min()
+									|| (int) newValue > field.getAnnotation(CheckIntegerInterval.class).max())) {
+						throw new ParameterException("Unable to set field: " + field.getName() + ". Value " + newValue
+								+ " is not in specified interval");
+					}
 					notifyListeners(property, field.get(this), newValue);
 					field.set(this, newValue);
+
 				} catch (IllegalArgumentException | IllegalAccessException e) {
 					throw new ParameterException("Unable to set field: " + field.getName() + " with value: " + param,
 							e);
@@ -658,7 +684,7 @@ public class Light {
 		for (Field field : this.getClass().getDeclaredFields()) {
 			if (field.isAnnotationPresent(Property.class)) {
 				try {
-					builder.append(field.getAnnotation(Property.class).value()).append(": ")
+					builder.append(field.getAnnotation(Property.class).field()).append(": ")
 							.append(field.get(this).toString()).append("\r\n");
 				} catch (IllegalAccessException e) {
 				}

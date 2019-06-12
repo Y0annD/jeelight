@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +28,12 @@ import fr.yoanndiquelou.jeelight.model.Method;
 import fr.yoanndiquelou.jeelight.model.Trio;
 import fr.yoanndiquelou.jeelight.utils.FailFuture;
 
+/**
+ * Manage messages to send or receive.
+ * 
+ * @author Y0annD
+ *
+ */
 public class MessageManager {
 	/** Message manager logger. */
 	private static final Logger logger = LogManager.getLogger(MessageManager.class);
@@ -70,6 +77,9 @@ public class MessageManager {
 	 */
 	private Map<Integer, Duo<Command, Boolean>> mHistory = new HashMap<>();
 
+	/**
+	 * Map of mangagers organised by light.
+	 */
 	private static Map<Light, MessageManager> mManagers = new HashMap<>();
 
 	/**
@@ -82,6 +92,7 @@ public class MessageManager {
 	private MessageManager(Light light) throws IOException, ParameterException {
 		this(light, new Socket(light.getIp(), 55443));
 	}
+
 
 	/**
 	 * Message manager.
@@ -176,6 +187,8 @@ public class MessageManager {
 
 	/**
 	 * Process a response.
+	 * 
+	 * @param response response to process
 	 */
 	private void processCommandResponse(String response) {
 		logger.debug("Command response", response);
@@ -196,6 +209,8 @@ public class MessageManager {
 
 	/**
 	 * Process a notification.
+	 * 
+	 * @param notification notification to process
 	 */
 	private void processNotification(String notification) {
 		logger.debug("Notification", notification);
